@@ -10,7 +10,8 @@ const port = process.env.PORT || 8000
 
 // register routes
 // note to self: prefix/ endpoint
-app.use('/test', healthCheck)
+const prefix = '/exercise-express-pg'
+app.use(prefix, healthCheck)
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
