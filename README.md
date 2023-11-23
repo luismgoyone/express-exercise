@@ -38,6 +38,7 @@ posts
     id: int (auto increment)
     user_id: int
     content: text
+    created_at: timestamp
 ```
 
 
@@ -81,7 +82,28 @@ Endpoints
 
 
 
-* list down posts 
+* list down all posts 
+    * pass token as header
+    * validations 
+        * if token is invalid, return an unauthorized error
+    * return posts sorted by most recent created_at
+```
+{
+    "data": [
+        {
+            "id": <post id>,
+            "content": <post content>,
+            "first_name": <post user first_name>,
+            "last_name": <post user last_name>,
+            "username": <post user username>,
+        }
+    ]
+}
+```
+
+
+
+* list down user posts 
     * pass token as header
     * pass user id as parameter/payload
     * validations 
@@ -97,7 +119,6 @@ Endpoints
     ]
 }
 ```
-
 
 
 
