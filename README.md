@@ -1,4 +1,8 @@
-BE Exercise (Node.js & PostgreSQL)
+### BE Exercise (Node.js & PostgreSQL)
+
+# Overview
+create a backend application that allows user registration/login as well as create posts for each user
+
 Installation
 
 PostgreSQL
@@ -20,15 +24,15 @@ DB Schema
 ```
 users
     id: int (auto increment)
-    first_name: varchar
-    last_name: varchar
+    first_name: varchar(20)
+    last_name: varchar(20)
 
 user_logins
     user_id: int
     token: text
     last_login_at: timestamp
-    username: varchar
-    password: varchar
+    username: varchar(20)
+    password: varchar(20)
 
 posts
     id: int (auto increment)
