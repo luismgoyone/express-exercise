@@ -2,7 +2,7 @@
   "name": "exercise-express-pg",
   "version": "1.0.0",
   "description": "# Overview create a backend application that allows user registration/login as well as create posts for each user",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
