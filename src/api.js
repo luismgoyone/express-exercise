@@ -94,7 +94,14 @@ app.post('/register', async (req, res) => {
         await query(`INSERT INTO user_logins (user_id, token, last_login_at, username, password)
                         VALUES (${userId}, '${generateToken()}', '${date.format(new Date(), 'MM/DD/YYYY HH:mm:ss ZZ')}', '${user.username}', '${user.password}')`);
 
-        res.send("Registered new user.");
+        const userRecord = await query(`
+            SELECT a.id, a.first_name, a.last_name, b.username 
+            FROM users a 
+            JOIN user_logins b ON a.id = b.user_id
+            WHERE a.id = ${userId}`);
+
+        console.log("Registered new user.");
+        res.send(userRecord.rows[0]);
     }
     catch (err) {
         console.error("Error during registration: ", err.message);
