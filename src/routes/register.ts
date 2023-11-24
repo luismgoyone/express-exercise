@@ -12,7 +12,7 @@ const connector = Connector.getInstance();
 router.use("/register", validateRegisterPayload(connector));
 
 router.post("/register", async (req: Request, res: Response) => {
-  const body: User = req.body;
+  const body: Partial<User> = req.body;
   const { first_name, last_name, username, password } = body ?? {};
 
   try {
@@ -47,9 +47,9 @@ router.post("/register", async (req: Request, res: Response) => {
       [username]
     );
 
-    res
-      .status(200)
-      .json({ message: "User has been registered!", data: query.rows[0] });
+    const user: Partial<User> = query.rows[0];
+
+    res.status(200).json({ message: "User has been registered!", user });
   } catch (e) {
     res
       .status(404)

@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from "express";
 
-import { UserLogin } from "../types/user";
+import User from "../types/user";
 import { validateLoginPayload } from "../middlewares/validation";
 import Connector from "../database/connector";
 
@@ -11,7 +11,7 @@ const connector = Connector.getInstance();
 router.use("/login", validateLoginPayload(connector));
 
 router.post("/login", async (req: Request, res: Response) => {
-  const body: UserLogin = req.body;
+  const body: Partial<User> = req.body;
   const { username } = body;
 
   try {

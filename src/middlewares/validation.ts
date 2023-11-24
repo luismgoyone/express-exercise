@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { Knex } from "knex";
-import User, { UserLogin } from "../types/user";
+import User from "../types/user";
 
 export const validateRegisterPayload =
   (connector: Knex) =>
   async (req: Request, res: Response, next: NextFunction) => {
-    const body: User = req.body;
+    const body: Partial<User> = req.body;
     const { first_name, last_name, username, password } = body ?? {};
 
     try {
@@ -49,7 +49,7 @@ export const validateLoginPayload =
   (connector: Knex) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const body: UserLogin = req.body;
+      const body: Partial<User> = req.body;
       const { username, password } = body;
 
       if (username && password) {
@@ -67,7 +67,7 @@ export const validateLoginPayload =
           [username]
         );
 
-        const user: UserLogin = query.rows[0];
+        const user: Partial<User> = query.rows[0];
 
         if (query.rows.length == 0 || user.password !== password) {
           res
