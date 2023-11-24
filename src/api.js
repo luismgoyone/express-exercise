@@ -1,6 +1,7 @@
 const client = require('./connection.js');
 const express = require('express');
 const bodyParser = require('body-parser');
+const date = require("date-and-time")
 
 const app = express();
 const port = 3300;
@@ -15,6 +16,18 @@ function generateToken(){
         b[i] = a[j];
     }
     return b.join("");
+}
+
+function query(sql, values) {
+    return new Promise((resolve, reject) => {
+        client.query(sql, values, (err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result);
+            }
+        });
+    });
 }
 
 app.listen(port, () => {
@@ -59,56 +72,31 @@ app.post('/users', (req, res) => {
     });
 });
 
-app.post('/register', (req, res) => {
-    const user = req.body;
+app.post('/register', async (req, res) => {
+    try {
+        const user = req.body;
 
-    client.query(`SELECT * FROM user_logins WHERE username=${user.username}`, (err, result) => {
-        if(!err) {
-            if(result.rowCount > 0) {
-                console.log("ERROR: Username already exists");
-            }
+        const userQuery = await query(`SELECT * FROM user_logins WHERE username='${user.username}'`);
+        if(userQuery.rowCount > 0) {
+            return res.send("ERROR: Username already exists.");
         }
-        // else {
-        //     console.log(err.message);
-        // }
-    });
 
-    if(user.password.length < 8) {
-        // console.log("ERROR: Password should be at least 8 characters");
-        res.send("ERROR: Password should be at least 8 characters");
-        client.end;
+        if(user.password.length < 8) {
+            return res.send("ERROR: Password should be at least 8 characters.");
+        }
+
+        await query(`INSERT INTO users (first_name, last_name)
+                        VALUES ('${user.first_name}', '${user.last_name}')`);
+
+        const selectUserIdQuery = await query(`SELECT id FROM users WHERE first_name='${user.first_name}' AND last_name='${user.last_name}'`)
+        const userId = selectUserIdQuery.rows[0].id;
+
+        await query(`INSERT INTO user_logins (user_id, token, last_login_at, username, password)
+                        VALUES (${userId}, '${generateToken()}', '${date.format(new Date(), 'MM/DD/YYYY HH:mm:ss ZZ')}', '${user.username}', '${user.password}')`);
+
+        res.send("Registered new user.");
     }
-    else {
-        client.query(`INSERT INTO users (first_name, last_name)
-                        VALUES ('${user.first_name}', '${user.last_name}')`, (err, result) => {
-
-            if(!err) {
-                client.query(`SELECT id FROM users WHERE first_name='${user.first_name}' AND last_name='${user.last_name}'`, (err, result2) => {
-                    const id = result2.rows[0].id;
-                    if(!err) {
-                        client.query(`INSERT INTO user_logins (user_id, token, last_login_at, username, password)
-                                        VALUES (${id}, '${generateToken()}', '${new Date()}', '${user.username}', '${user.password}')`, (err, result) => {
-                            if(!err) {
-                                res.send('Registered new user.');
-                            }
-                            else {
-                                res.send(err.message);
-                                client.end;
-                            }
-                        });
-                    }
-                    else {
-                        res.send(err.message);
-                        client.end;
-                    }
-                });
-            }
-            else {
-                res.send(err.message);
-                client.end;
-            }
-
-        });
+    catch (err) {
+        console.error("Error during registration: ", err.message);
     }
-    client.end;
 })
