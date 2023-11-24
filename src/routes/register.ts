@@ -10,16 +10,24 @@ const connector = Connector.getInstance();
 // validation middleware
 router.use(async (req: Request, res: Response, next: NextFunction) => {
   const body: User = req.body;
+  const { first_name, last_name, username, password } = body ?? {};
 
   try {
-    if ((body.first_name, body.last_name, body.username, body.password)) {
+    if (first_name && last_name && username && password) {
+      if (password.length < 8) {
+        res
+          .status(400)
+          .json({ message: "Password must at least be 8 characters long." });
+        return;
+      }
+
       const query = await connector.raw(
         `
             SELECT username
             FROM users
             WHERE username = ?;
         `,
-        [body.username]
+        [username]
       );
 
       if (query.rows.length > 0) {
@@ -27,7 +35,7 @@ router.use(async (req: Request, res: Response, next: NextFunction) => {
         return;
       }
     } else {
-      res.status(400).json({ message: "Incorrect payload type" });
+      res.status(400).json({ message: "Incorrect payload type." });
       return;
     }
   } catch (e) {
