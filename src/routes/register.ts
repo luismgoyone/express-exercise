@@ -11,7 +11,7 @@ const connector = Connector.getInstance();
 // validation middleware
 router.use(validatePayload(connector));
 
-router.get("/", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   const body: User = req.body;
   const { first_name, last_name, username, password } = body ?? {};
 
