@@ -5,4 +5,6 @@ interface User {
   password: string;
 }
 
+export type UserLogin = Pick<User, "username" | "password">;
+
 export default User;

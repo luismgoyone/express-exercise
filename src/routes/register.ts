@@ -41,7 +41,8 @@ router.post("/register", async (req: Request, res: Response) => {
             FROM users AS u
             INNER JOIN user_logins AS u_log
             ON u_log.user_id = u.id
-            WHERE username = ?;
+            WHERE username = ?
+            LIMIT 1;
         `,
       [username]
     );
