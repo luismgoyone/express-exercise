@@ -1,7 +1,7 @@
 import express, { Router, Request, Response, NextFunction } from "express";
 
 import User from "../types/user";
-import { validatePayload } from "../middlewares/validation";
+import { validateRegisterPayload } from "../middlewares/validation";
 import Connector from "../database/connector";
 
 export const router: Router = express.Router();
@@ -9,7 +9,7 @@ export const router: Router = express.Router();
 const connector = Connector.getInstance();
 
 // validation middleware
-router.use(validatePayload(connector));
+router.use(validateRegisterPayload(connector));
 
 router.post("/", async (req: Request, res: Response) => {
   const body: User = req.body;
