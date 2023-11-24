@@ -138,15 +138,6 @@ app.post('/logout', async (req, res) => {
     }
 });
 
-// app.post('/posts/create', async (req, res) => {
-//     try {
-
-//     }
-//     catch (err) {
-//         console.error("Error during login: ", err.message);
-//     }
-// });
-
 app.post('/posts/create', async (req, res) => {
     try {
         const user = req.body;
@@ -223,5 +214,45 @@ app.post('/posts/delete', async (req, res) => {
     }
     catch (err) {
         console.error("Error on updating post: ", err.message);
+    }
+});
+
+app.post('/posts/all', async (req, res) => {
+    try {
+        const allPostsQuery = await query(`SELECT a.id, a.content, b.first_name, b.last_name, c.username, a.created_at
+                                            FROM posts a
+                                            JOIN users b ON a.user_id = b.id
+                                            JOIN user_logins c ON a.user_id = c.user_id
+                                            ORDER BY a.created_at DESC`);
+        res.send({
+            data: allPostsQuery.rows
+        });
+    }
+    catch (err) {
+        console.error("Error on displaying all posts: ", err.message);
+    }
+});
+
+app.post('/posts/user', async (req, res) => {
+    try {
+        const user = req.body;
+
+        if(!user.user_id) {
+            return res.send("ERROR: Incomplete details.");
+        }
+
+        const postQuery = await query(`SELECT * FROM posts WHERE user_id=${user.user_id}`);
+        if(postQuery.rowCount === 0) {
+            return res.send("ERROR: User has no post/s");
+        }
+
+        const allPostsQuery = await query(`SELECT id, content
+                                            FROM posts WHERE user_id=${user.user_id}`);
+        res.send({
+            data: allPostsQuery.rows
+        });
+    }
+    catch (err) {
+        console.error("Error on displaying user posts: ", err.message);
     }
 });
