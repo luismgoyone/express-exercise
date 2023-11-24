@@ -1,4 +1,4 @@
-import express, { Router, Request, Response, NextFunction } from "express";
+import express, { Router, Request, Response } from "express";
 
 import User from "../types/user";
 import { validateRegisterPayload } from "../middlewares/validation";
@@ -9,9 +9,9 @@ export const router: Router = express.Router();
 const connector = Connector.getInstance();
 
 // validation middleware
-router.use(validateRegisterPayload(connector));
+router.use("/register", validateRegisterPayload(connector));
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/register", async (req: Request, res: Response) => {
   const body: User = req.body;
   const { first_name, last_name, username, password } = body ?? {};
 
@@ -23,7 +23,6 @@ router.post("/", async (req: Request, res: Response) => {
         `,
       [first_name, last_name]
     );
-
     await connector.raw(
       `
             INSERT INTO user_logins (user_id, username, password)
@@ -32,7 +31,24 @@ router.post("/", async (req: Request, res: Response) => {
       [username, password]
     );
 
-    res.status(200).json({ message: "User has been registered!" });
+    const query = await connector.raw(
+      `
+            SELECT
+                u.id AS id,
+                u.first_name AS first_name,
+                u.last_name AS last_name,
+                u_log.username AS username
+            FROM users AS u
+            INNER JOIN user_logins AS u_log
+            ON u_log.user_id = u.id
+            WHERE username = ?;
+        `,
+      [username]
+    );
+
+    res
+      .status(200)
+      .json({ message: "User has been registered!", data: query.rows[0] });
   } catch (e) {
     res
       .status(404)

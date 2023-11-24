@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { Knex } from "knex";
 import User from "../types/user";
 
-export const validatePayload =
+export const validateRegisterPayload =
   (connector: Knex) =>
   async (req: Request, res: Response, next: NextFunction) => {
     const body: User = req.body;
@@ -44,5 +44,13 @@ export const validatePayload =
       return;
     }
 
+    next();
+  };
+
+export const validateLoginPayload =
+  (connector: Knex) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+    } catch (e) {}
     next();
   };
