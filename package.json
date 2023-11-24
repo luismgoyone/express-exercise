@@ -1,0 +1,11 @@
+{
+  "name": "exercise-express-pg",
+  "version": "1.0.0",
+  "description": "create a backend application that allows user registration/login as well as create posts for each user",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
