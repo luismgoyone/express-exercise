@@ -7,7 +7,7 @@ enum DbClients {
 }
 
 class Connector {
-  static getPostgreInstance(): Knex {
+  static getInstance(): Knex {
     return knex({
       client: DbClients.POSTGRES,
       connection: {
