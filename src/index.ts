@@ -10,6 +10,6 @@ const PORT: number = Number(process.env.PORT) ?? 3001;
 
 app.use(bodyParser());
 
-app.use("/api/user", RegisterRouter);
+app.use("/api/user/register", RegisterRouter);
 
 app.listen(PORT, () => console.log("Connected to server"));
