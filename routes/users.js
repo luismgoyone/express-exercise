@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 
 const db = require('../db/dbClient');
 
-function validateRegisterParam(field) {
+function validateStringUserParam(field) {
   return body(field)
     .exists()
     .withMessage(`${field} is required`)
@@ -18,7 +18,7 @@ function validateRegisterParam(field) {
 }
 
 const validationsRegisterEndpoint = ['first_name', 'last_name', 'username', 'password'].map(field => {
-  return validateRegisterParam(field);
+  return validateStringUserParam(field);
 });
 
 router.post('/register', validationsRegisterEndpoint, async (req, res) => {
