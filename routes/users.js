@@ -1,49 +1,42 @@
 const express = require('express');
 const router = express.Router();
+const { body, validationResult } = require('express-validator');
 
 const db = require('../db/dbClient');
 
-router.post('/register', async (req, res) => {
+const validationsRegisterEndpoint = ['first_name', 'last_name'/*, 'username', 'password'*/].map(field => {
+  return body(field)
+    .exists()
+    .withMessage(`${field} is required`)
+    .isString()
+    .withMessage(`${field} must be a string`)
+    .isLength({
+      min: (field === 'password' ? 8 : 1),
+      max: 20,
+    })
+    .withMessage(`String ${field} should have a length of 1 up to 20 characters`);
+});
+
+router.post('/register', validationsRegisterEndpoint, async (req, res) => {
   // TODO: Update implementation (should involve the `user_logins` table)
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors });
+    return;
+  }
+
   const {
     first_name,
     last_name,
   } = req.body;
 
-  const errors = [];
-
-  // TODO: Maybe refactor using express-validator
-  if (!first_name) {
-    errors.push({ message: 'Parsed falsy value for param "first_name"' });
-  } else if (typeof last_name !== 'string') {
-    errors.push({ message: 'Value for param "first_name" should be of type "string"' });
-  } else if (
-    !first_name.length ||
-    first_name.length > 20
-  ) {
-    errors.push({ message: 'String "first_name" should have a length of 1 up to 20 characters' });
-  }
-
-  if (!last_name) {
-    errors.push({ message: 'Parsed falsy value for param "last_name"' });
-  } else if (typeof last_name !== 'string') {
-    errors.push({ message: 'Value for param "last_name" should be of type "string"' });
-  } else if (
-    !last_name.length ||
-    last_name.length > 20
-  ) {
-    errors.push({ message: 'String "last_name" should have a length of 1 up to 20 characters' });
-  }
-
-  if (errors.length) {
-    res.status(400).json({ errors });
-    return;
-  }
-
   const result = await db('users')
     .insert({
       first_name: first_name.trim(),
       last_name: last_name.trim(),
+      // username: username.trim(),
+      // password: password,
     })
     .returning('*');
 
