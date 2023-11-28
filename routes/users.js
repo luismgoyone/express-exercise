@@ -3,7 +3,7 @@ const router = express.Router();
 
 const db = require('../db/dbClient');
 
-router.post('/create', async (req, res) => {
+router.post('/register', async (req, res) => {
   const {
     first_name,
     last_name,
