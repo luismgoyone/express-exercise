@@ -64,11 +64,60 @@ router.post('/register', validationsRegisterEndpoint, async (req, res) => {
   });
 });
 
-router.post('login', async (req, res) => {
+router.post('/login', async (req, res) => {
   // TODO: Implement
+
+  const {
+    username,
+    password,
+  } = req.body;
+
+  const [userLoginRecordByUsername] = await db('user_logins')
+    .where({ username })
+    .select('username')
+    .from('user_logins')
+    .returning('*');
+
+  console.log({ userLoginRecordByUsername });
+
+  res.send({ userLoginRecordByUsername })
+  
+  // validations against records
+
+  // if username doesn't exist, return an error
+  if (!userLoginRecordByUsername) {
+    res.status(400).send({ error: `User ${username} not found` });
+    return;
+  }
+
+  const [userLoginMatchingRecord] = await db('user_logins')
+    .where({
+      username,
+      password,
+    })
+    .select('username')
+    .from('user_logins')
+    .returning('*');
+  
+    console.log({ userLoginMatchingRecord });
+
+  // if username and password combination is invalid, return an error
+  if (
+    userLoginRecordByUsername &&
+    !userLoginMatchingRecord
+  ) {
+    res.status(400).send({ error: `Incorrect username or password` });
+    return;
+  }
+
+  // TODO: generate and set token here?
+
+  // TODO: retrieve record from DB (USE JOIN)
+  
+  // TODO: return user record (USE JOIN)
 });
 
-router.post('logout', async (req, res) => {
+router.post('/logout', async (req, res) => {
   // TODO: Implement
 });
 
