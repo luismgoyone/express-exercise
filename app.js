@@ -24,8 +24,8 @@ const db = require('knex')({
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
-})
+  res.json({ message: 'Hello World' });
+});
 
 app.post('/insert-user', async (req, res) => {
   // TODO: Implement
