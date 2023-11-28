@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 
 const db = require('../db/dbClient');
 
-const validationsRegisterEndpoint = ['first_name', 'last_name'/*, 'username', 'password'*/].map(field => {
+const validationsRegisterEndpoint = ['first_name', 'last_name', 'username', 'password'].map(field => {
   return body(field)
     .exists()
     .withMessage(`${field} is required`)
@@ -18,7 +18,6 @@ const validationsRegisterEndpoint = ['first_name', 'last_name'/*, 'username', 'p
 });
 
 router.post('/register', validationsRegisterEndpoint, async (req, res) => {
-  // TODO: Update implementation (should involve the `user_logins` table)
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -29,19 +28,36 @@ router.post('/register', validationsRegisterEndpoint, async (req, res) => {
   const {
     first_name,
     last_name,
+    username,
+    password,
   } = req.body;
 
-  const result = await db('users')
+  const [returnedUser] = await db('users')
     .insert({
       first_name: first_name.trim(),
       last_name: last_name.trim(),
-      // username: username.trim(),
-      // password: password,
     })
     .returning('*');
 
-  // TODO: response should be { id, first_name, last_name, username }
-  res.json(result);
+  const [returnedUserLogin] = await db('user_logins')
+    .insert({
+      user_id: returnedUser.id,
+      username: username.trim(),
+      password: password,
+    })
+    .returning('*');
+
+  console.log(JSON.stringify({
+    returnedUser,
+    returnedUserLogin,
+  }, null, 2));
+
+  res.json({
+    id: returnedUser.id,
+    first_name: returnedUser.first_name,
+    last_name: returnedUser.last_name,
+    username: returnedUserLogin.username,
+  });
 });
 
 router.post('login', async (req, res) => {
