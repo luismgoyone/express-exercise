@@ -18,7 +18,7 @@ router.put("/login", async (req: Request, res: Response) => {
   const body: Partial<User> = req.body;
   const { username } = body;
 
-  const token = jwt.sign({ username }, process.env.SECRET_KEY);
+  const token = jwt.sign({ id: res.locals.userId }, process.env.SECRET_KEY);
 
   const date = new Date().toISOString();
 

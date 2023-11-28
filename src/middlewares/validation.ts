@@ -2,7 +2,6 @@ require("dotenv").config();
 
 import { Request, Response, NextFunction } from "express";
 import { Knex } from "knex";
-import { JsonWebTokenError } from "jsonwebtoken";
 
 import User from "../types/user";
 import { LogoutHeaders } from "../types/headers";
@@ -45,6 +44,7 @@ export const validateRegisterPayload =
       res
         .status(404)
         .json({ errors: `Something went wrong with the query, ${e}` });
+      return;
     }
 
     next();
@@ -61,6 +61,7 @@ export const validateLoginPayload =
         const query = await connector.raw(
           `
                 SELECT
+                    u_log.user_id AS id,
                     u_log.username AS username,
                     u_log.password AS password
                 FROM users AS u
@@ -80,6 +81,8 @@ export const validateLoginPayload =
             .json({ message: "Invalid User credentials. Please try again." });
           return;
         }
+
+        res.locals.userId = user.id;
       } else {
         res.status(400).json({ message: "Incorrect payload type." });
         return;
@@ -88,6 +91,7 @@ export const validateLoginPayload =
       res
         .status(404)
         .json({ errors: `Something went wrong with the query, ${e}` });
+      return;
     }
 
     next();
@@ -100,9 +104,9 @@ export const validateToken = async (
 ) => {
   const headers: LogoutHeaders = req.headers;
   const userToken = headers["x-user-token"];
-  const userName = headers["x-user-name"];
+  const userId = headers["x-user-id"];
 
-  if (!userToken) {
+  if (!userToken && !userId) {
     res
       .status(400)
       .send({ message: "No x-user-token found in request headers" });
@@ -117,12 +121,15 @@ export const validateToken = async (
       process.env.SECRET_KEY
     );
 
-    if (decoded.username !== userName) {
+    if (!decoded.id || decoded.id !== userId) {
       res.status(400).json({ message: "Invalid Token" });
       return;
     }
+
+    res.locals.userId = decoded.id;
   } catch (e) {
     res.status(404).json({ errors: `Something went wrong ${e}` });
+    return;
   }
   next();
 };
