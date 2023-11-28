@@ -14,7 +14,7 @@ const jwt = require("jsonwebtoken");
 // validation middleware
 router.use("/login", validateLoginPayload(connector));
 
-router.post("/login", async (req: Request, res: Response) => {
+router.put("/login", async (req: Request, res: Response) => {
   const body: Partial<User> = req.body;
   const { username } = body;
 

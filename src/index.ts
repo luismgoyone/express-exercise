@@ -4,6 +4,7 @@ import express, { Express } from "express";
 
 import { router as RegisterRouter } from "./routes/register";
 import { router as LoginRouter } from "./routes/login";
+import { router as LogoutRouter } from "./routes/logout";
 
 const app: Express = express();
 const PORT: number = Number(process.env.PORT) ?? 3001;
@@ -13,5 +14,6 @@ app.use(express.json());
 
 app.use(prefix, RegisterRouter);
 app.use(prefix, LoginRouter);
+app.use(prefix, LogoutRouter);
 
 app.listen(PORT, () => console.log("Connected to server"));

@@ -1,6 +1,11 @@
+require("dotenv").config();
+
 import { Request, Response, NextFunction } from "express";
 import { Knex } from "knex";
+import { JsonWebTokenError } from "jsonwebtoken";
+
 import User from "../types/user";
+import { LogoutHeaders } from "../types/headers";
 
 export const validateRegisterPayload =
   (connector: Knex) =>
@@ -87,3 +92,43 @@ export const validateLoginPayload =
 
     next();
   };
+
+export const validateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const headers: LogoutHeaders = req.headers;
+  const userToken = headers["x-user-token"];
+
+  if (!userToken) {
+    res
+      .status(400)
+      .send({ message: "No x-user-token found in request headers" });
+    return;
+  }
+
+  const body: Partial<User> = req.body;
+  const { username } = body;
+  const jwt = require("jsonwebtoken");
+
+  try {
+    jwt.verify(
+      userToken,
+      process.env.SECRET_KEY,
+      async (err: JsonWebTokenError, decoded: Partial<User>) => {
+        if (err || decoded.username !== username) {
+          res.status(400).send({
+            message: "Invalid Token",
+          });
+          return;
+        }
+      }
+    );
+  } catch (e) {
+    res
+      .status(404)
+      .json({ errors: `Something went wrong with the query, ${e}` });
+  }
+  next();
+};
