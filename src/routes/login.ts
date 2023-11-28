@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 import express, { Router, Request, Response } from "express";
 
 import User from "../types/user";
@@ -7,6 +9,8 @@ import Connector from "../database/connector";
 export const router: Router = express.Router();
 const connector = Connector.getInstance();
 
+const jwt = require("jsonwebtoken");
+
 // validation middleware
 router.use("/login", validateLoginPayload(connector));
 
@@ -14,7 +18,25 @@ router.post("/login", async (req: Request, res: Response) => {
   const body: Partial<User> = req.body;
   const { username } = body;
 
+  const token = jwt.sign({ username }, process.env.SECRET_KEY);
+  const date = new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "full",
+    timeStyle: "long",
+  }).format(Date.now());
+
   try {
+    await connector.raw(
+      `
+            UPDATE user_logins
+            SET
+              token = ?,
+              last_login_at = ?
+            WHERE
+              username = ?;
+      `,
+      [token, date, username]
+    );
+
     const query = await connector.raw(
       `
             SELECT
