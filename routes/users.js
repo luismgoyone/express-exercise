@@ -4,6 +4,7 @@ const router = express.Router();
 const db = require('../db/dbClient');
 
 router.post('/register', async (req, res) => {
+  // TODO: Update implementation (should involve the `user_logins` table)
   const {
     first_name,
     last_name,
