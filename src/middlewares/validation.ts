@@ -126,9 +126,7 @@ export const validateToken = async (
       }
     );
   } catch (e) {
-    res
-      .status(404)
-      .json({ errors: `Something went wrong with the query, ${e}` });
+    res.status(404).json({ errors: `Something went wrong ${e}` });
   }
   next();
 };
