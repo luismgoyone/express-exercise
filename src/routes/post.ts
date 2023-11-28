@@ -10,6 +10,34 @@ const connector = Connector.getInstance();
 // validate x-user-token in req headers
 router.use("/post", validateToken);
 
+router.get("/post", async (req: Request, res: Response) => {
+  try {
+    const query = await connector.raw(
+      `
+            SELECT
+                p.id AS id,
+                p.content AS content,
+                u.first_name AS first_name,
+                u.last_name AS last_name,
+                u_log.username AS username
+            FROM users AS u
+            INNER JOIN user_logins AS u_log
+            ON u.id = u_log.user_id
+            INNER JOIN posts AS p
+            ON u_log.user_id = p.user_id;
+        `
+    );
+
+    const posts = query.rows;
+
+    res.status(200).json({ data: posts });
+  } catch (e) {
+    res
+      .status(404)
+      .json({ errors: `Something went wrong with the query, ${e}` });
+  }
+});
+
 router.post("/post", async (req: Request, res: Response) => {
   const body: Post = req.body;
   const { user_id, content } = body;
@@ -27,6 +55,30 @@ router.post("/post", async (req: Request, res: Response) => {
     const [post] = query.rows;
 
     res.status(200).json({ post });
+  } catch (e) {
+    res
+      .status(404)
+      .json({ errors: `Something went wrong with the query, ${e}` });
+  }
+});
+
+router.get("/post/:userId", async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  try {
+    const query = await connector.raw(
+      `
+              SELECT
+                  id,
+                  content
+              FROM posts
+              WHERE user_id = ?
+          `,
+      [userId]
+    );
+
+    const posts = query.rows;
+
+    res.status(200).json({ data: posts });
   } catch (e) {
     res
       .status(404)

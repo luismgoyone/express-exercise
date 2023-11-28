@@ -11,8 +11,12 @@ const connector = Connector.getInstance();
 router.use("/logout", validateToken);
 
 router.put("/logout", async (req: Request, res: Response) => {
-  const body: Partial<User> = req.body;
-  const { username } = body;
+  const { userId } = res.locals;
+
+  if (!userId) {
+    res.status(400).json({ message: "Something went wrong!" });
+    return;
+  }
 
   try {
     await connector.raw(
@@ -21,9 +25,9 @@ router.put("/logout", async (req: Request, res: Response) => {
             SET
                 token = null
             WHERE
-                username = ?
+                user_id = ?
         `,
-      [username]
+      [userId]
     );
 
     res.status(200).json({ message: "success" });

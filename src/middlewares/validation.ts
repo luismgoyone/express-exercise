@@ -103,32 +103,21 @@ export const validateToken = async (
   next: NextFunction
 ) => {
   const headers: LogoutHeaders = req.headers;
-  const userToken = headers["x-user-token"];
-  const userId = headers["x-user-id"];
+  const token = headers.authorization?.split(" ")[1];
 
-  if (!userToken && !userId) {
-    res
-      .status(400)
-      .send({ message: "No x-user-token found in request headers" });
+  if (!token) {
+    res.status(400).send({ error: "Unauthorized Error. No user token found." });
     return;
   }
 
   const jwt = require("jsonwebtoken");
 
   try {
-    const decoded: Partial<User> = jwt.verify(
-      userToken,
-      process.env.SECRET_KEY
-    );
-
-    if (!decoded.id || decoded.id !== userId) {
-      res.status(400).json({ message: "Invalid Token" });
-      return;
-    }
+    const decoded: Partial<User> = jwt.verify(token, process.env.SECRET_KEY);
 
     res.locals.userId = decoded.id;
   } catch (e) {
-    res.status(404).json({ errors: `Something went wrong ${e}` });
+    res.status(404).json({ message: "Invalid Token" });
     return;
   }
   next();
