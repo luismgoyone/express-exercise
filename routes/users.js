@@ -49,4 +49,12 @@ router.post('/register', async (req, res) => {
   res.json(result);
 });
 
+router.post('login', async (req, res) => {
+  // TODO: Implement
+});
+
+router.post('logout', async (req, res) => {
+  // TODO: Implement
+});
+
 module.exports = router;
