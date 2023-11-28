@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 
 const db = require('../db/dbClient');
 
-const validationsRegisterEndpoint = ['first_name', 'last_name', 'username', 'password'].map(field => {
+function validateRegisterParam(field) {
   return body(field)
     .exists()
     .withMessage(`${field} is required`)
@@ -15,6 +15,10 @@ const validationsRegisterEndpoint = ['first_name', 'last_name', 'username', 'pas
       max: 20,
     })
     .withMessage(`String ${field} should have a length of 1 up to 20 characters`);
+}
+
+const validationsRegisterEndpoint = ['first_name', 'last_name', 'username', 'password'].map(field => {
+  return validateRegisterParam(field);
 });
 
 router.post('/register', validationsRegisterEndpoint, async (req, res) => {
