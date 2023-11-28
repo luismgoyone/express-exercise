@@ -40,6 +40,7 @@ router.post('/register', validationsRegisterEndpoint, async (req, res) => {
     })
     .returning('*');
 
+  // TODO: response should be { id, first_name, last_name, username }
   res.json(result);
 });
 
