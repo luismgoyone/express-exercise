@@ -19,10 +19,8 @@ router.put("/login", async (req: Request, res: Response) => {
   const { username } = body;
 
   const token = jwt.sign({ username }, process.env.SECRET_KEY);
-  const date = new Intl.DateTimeFormat("en-PH", {
-    dateStyle: "full",
-    timeStyle: "long",
-  }).format(Date.now());
+
+  const date = new Date().toISOString();
 
   try {
     await connector.raw(

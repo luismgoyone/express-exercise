@@ -100,6 +100,7 @@ export const validateToken = async (
 ) => {
   const headers: LogoutHeaders = req.headers;
   const userToken = headers["x-user-token"];
+  const userName = headers["x-user-name"];
 
   if (!userToken) {
     res
@@ -108,23 +109,18 @@ export const validateToken = async (
     return;
   }
 
-  const body: Partial<User> = req.body;
-  const { username } = body;
   const jwt = require("jsonwebtoken");
 
   try {
-    jwt.verify(
+    const decoded: Partial<User> = jwt.verify(
       userToken,
-      process.env.SECRET_KEY,
-      async (err: JsonWebTokenError, decoded: Partial<User>) => {
-        if (err || decoded.username !== username) {
-          res.status(400).send({
-            message: "Invalid Token",
-          });
-          return;
-        }
-      }
+      process.env.SECRET_KEY
     );
+
+    if (decoded.username !== userName) {
+      res.status(400).json({ message: "Invalid Token" });
+      return;
+    }
   } catch (e) {
     res.status(404).json({ errors: `Something went wrong ${e}` });
   }
