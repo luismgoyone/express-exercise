@@ -118,20 +118,19 @@ app.post('/login', async (req, res) => {
 
 app.post('/logout', async (req, res) => {
     // INQUIRY ON PASSING TOKEN AS HEADER + VALIDATION 😭 //
+    const token = req.headers.authorization;
+
+    if(!token) {
+        return res.status(401).send("ERROR: Unauthorized token.");
+    }
+
     try {
-        const user = req.body;
-
-        const userQuery = await query(`SELECT * FROM user_logins WHERE user_id=${user.id}`);
-        if(userQuery.rows[0].token === null) {
-            return res.send("ERROR: User is not logged in.");
-        }
-
-        await query(`UPDATE user_logins SET token=null WHERE user_id=${user.id}`);
+        await query(`UPDATE user_logins SET token=null WHERE token='${token}'`);
 
         console.log("Successfully logged out.");
         res.send({
             success: true
-        })
+        });
     }
     catch (err) {
         console.error("Error during logout: ", err.message);
