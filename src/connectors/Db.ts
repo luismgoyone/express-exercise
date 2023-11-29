@@ -1,9 +1,8 @@
-import knex, { Knex } from 'knex'
+import knex from 'knex'
 
 class Database {
-  static connector: Knex
-  constructor() {
-    Database.connector = knex({
+  static getInstance() {
+    return knex({
       client: process.env.DATABASE_CLIENT,
       connection: {
         database: process.env.DATABASE_NAME,

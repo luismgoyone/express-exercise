@@ -1,6 +1,7 @@
-import express, { Express, Request, Response, Application, response, Router } from 'express'
+import express, { Express, } from 'express'
 import { config } from 'dotenv'
-import healthCheck from './routes/health-check' // TODO: fix tsconfig path
+import health from './routes/health'
+import registerUser from './routes/api/register'
 
 config()
 
@@ -8,10 +9,15 @@ config()
 const app: Express = express() 
 const port = process.env.PORT || 8000
 
-// register routes
-// note to self: prefix/ endpoint
+// parse data sent in http
+app.use(express.json())
+
 const prefix = '/exercise-express-pg'
-app.use(prefix, healthCheck)
+
+
+// register routes
+app.use(prefix, health)
+app.use(prefix, registerUser)
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
