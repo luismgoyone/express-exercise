@@ -85,3 +85,57 @@ router.get("/post/:userId", async (req: Request, res: Response) => {
       .json({ errors: `Something went wrong with the query, ${e}` });
   }
 });
+
+router.put("/post/:postId", async (req: Request, res: Response) => {
+  const { postId } = req.params;
+  const body: Partial<Post> = req.body;
+  const { content } = body;
+
+  if (!content) {
+    res.status(400).json({ errors: "Content payload is required." });
+    return;
+  }
+
+  try {
+    const query = await connector.raw(
+      `
+          UPDATE posts
+          SET content = ?
+          WHERE id = ?
+          RETURNING id, content;
+      `,
+      [content, postId]
+    );
+
+    const [post] = query.rows;
+
+    res.status(200).json(post);
+  } catch (e) {
+    res
+      .status(404)
+      .json({ errors: `Something went wrong with the query, ${e}` });
+  }
+});
+
+router.delete("/post/:postId", async (req: Request, res: Response) => {
+  const { postId } = req.params;
+
+  try {
+    const query = await connector.raw(
+      `
+          DELETE FROM posts
+          WHERE id = ?
+          RETURNING id, content;
+      `,
+      [postId]
+    );
+
+    const [post] = query.rows;
+
+    res.status(200).json(post);
+  } catch (e) {
+    res
+      .status(404)
+      .json({ errors: `Something went wrong with the query, ${e}` });
+  }
+});
