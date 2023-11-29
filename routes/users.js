@@ -69,7 +69,7 @@ router.post('/register', validationsRegisterEndpoint, async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  // TODO: Implement
+  // TODO: Wrap db operations in a try-catch block [?]
 
   const {
     username,
@@ -151,6 +151,8 @@ router.post('/login', async (req, res) => {
   
   // return user record (USE JOIN)
   res.send(userAndUserLoginRecord);
+
+  // TODO: Fix `ERR_HTTP_HEADERS_SENT: Cannot set headers after they are sent to the client` error
 });
 
 router.post('/logout', async (req, res) => {
