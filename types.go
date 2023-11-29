@@ -17,20 +17,20 @@ type User struct {
 	last_name  string // Max 20 chars
 }
 
-func (user *User) isFirstNameValid() bool {
+func (user *User) isFirstNameValid() (bool, string) {
 	const maxCharLength = 20
 	if len(user.first_name) > maxCharLength {
-		return false
+		return false, "First name must not exceed 20 characters"
 	}
-	return true
+	return true, ""
 }
 
-func (user *User) isLastNameValid() bool {
+func (user *User) isLastNameValid() (bool, string) {
 	const maxCharLength = 20
 	if len(user.last_name) > maxCharLength {
-		return false
+		return false, "Last name must not exceed 20 characters"
 	}
-	return true
+	return true, ""
 }
 
 // USER LOGIN
@@ -43,19 +43,21 @@ type UserLogin struct {
 	password      string // Min 8 chars, Max 20 chars
 }
 
-func (user_login *UserLogin) isUsernameValid() bool {
+func (user_login *UserLogin) isUsernameValid() (bool, string) {
 	if len(user_login.username) > 20 {
-		return false
+		return false, "User name must not exceed 20 characters"
 	}
-	return true
+	return true, ""
 }
 
-func (user_login *UserLogin) isPasswordValid() bool {
-	if len(user_login.password) > 20 ||
-		len(user_login.password) < 8 {
-		return false
+func (user_login *UserLogin) isPasswordValid() (bool, string) {
+	if len(user_login.password) > 20 {
+		return false, "Password must not exceed 20 characters"
 	}
-	return true
+	if len(user_login.password) < 8 {
+		return false, "Password must be at least 8 characters"
+	}
+	return true, ""
 }
 
 // USER ACCOUNT
@@ -65,12 +67,31 @@ type UserAccount struct {
 	UserLogin
 }
 
-func (user_account *UserAccount) isUserAccountValid() bool {
-	if user_account.isFirstNameValid() &&
-		user_account.isLastNameValid() &&
-		user_account.isPasswordValid() &&
-		user_account.isUserAccountValid() {
-		return true
+func (user_account *UserAccount) isUserAccountValid() (bool, []string) {
+	errors := []string{}
+	isAccValid := true
+
+	isFnValid, fnErr := user_account.isFirstNameValid()
+	isLnValid, lnErr := user_account.isLastNameValid()
+	isUnValid, unErr := user_account.isUsernameValid()
+	isPwValid, pwErr := user_account.isPasswordValid()
+
+	if !isFnValid {
+		errors = append(errors, fnErr)
+		isAccValid = isFnValid
 	}
-	return false
+	if !isLnValid {
+		errors = append(errors, lnErr)
+		isAccValid = isLnValid
+	}
+	if !isUnValid {
+		errors = append(errors, unErr)
+		isAccValid = isUnValid
+	}
+	if !isPwValid {
+		errors = append(errors, pwErr)
+		isAccValid = isPwValid
+	}
+
+	return isAccValid, errors
 }
