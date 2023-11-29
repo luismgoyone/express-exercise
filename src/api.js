@@ -5,6 +5,7 @@ const date = require("date-and-time")
 
 const app = express();
 const port = 3300;
+const format = 'MM/DD/YYYY HH:mm:ss ZZ';
 
 function generateToken(){
     const length = 24;
@@ -18,9 +19,11 @@ function generateToken(){
     return b.join("");
 }
 
-function query(sql, values) {
+async function query(sql, values) {
+    const pool = await client.connect();
+    
     return new Promise((resolve, reject) => {
-        client.query(sql, values, (err, result) => {
+        pool.query(sql, values, (err, result) => {
             if (err) {
                 reject(err);
             } else {
@@ -36,23 +39,23 @@ app.listen(port, () => {
 
 app.use(bodyParser.json());
 
-client.connect();
-
 app.post('/register', async (req, res) => {
+    const pool = await client.connect();
+
     try {
         const user = req.body;
 
         if(!user.first_name || !user.last_name || !user.username || !user.password) {
-            return res.send("ERROR: Incomplete details.");
+            return res.status(400).send("ERROR: Incomplete details.");
         }
 
         const userQuery = await query(`SELECT * FROM user_logins WHERE username='${user.username}'`);
         if(userQuery.rowCount > 0) {
-            return res.send("ERROR: Username already exists.");
+            return res.status(400).send("ERROR: Username already exists.");
         }
 
         if(user.password.length < 8) {
-            return res.send("ERROR: Password should be at least 8 characters.");
+            return res.status(400).send("ERROR: Password should be at least 8 characters.");
         }
 
         const insertQuery = await query(`INSERT INTO users (first_name, last_name) VALUES ('${user.first_name}', '${user.last_name}') RETURNING id`);
@@ -71,35 +74,39 @@ app.post('/register', async (req, res) => {
             WHERE a.id = ${userId}`);
 
         console.log("Registered new user.");
-        res.send(userRecord.rows[0]);
+        res.status(200).send(userRecord.rows[0]);
     }
     catch (err) {
-        console.error("Error during registration: ", err.message);
+        res.status(err.status).send("Error during registration: ", err.message)
+    }
+    finally {
+        pool.release();
     }
 });
 
 app.post('/login', async (req, res) => {
+    const pool = await client.connect();
+
     try {
         const user = req.body;
 
         if(!user.username || !user.password) {
-            return res.send("ERROR: Incomplete details.");
+            return res.status(400).send("ERROR: Incomplete details.");
         }
 
         const userQuery = await query(`SELECT * FROM user_logins WHERE username='${user.username}'`);
         if(userQuery.rowCount === 0) {
-            return res.send("ERROR: User does not exist.");
+            return res.status(404).send("ERROR: User does not exist.");
         }
 
         if(userQuery.rows[0].password !== user.password) {
-            return res.send("ERROR: Username and password does not match.");
+            return res.status(400).send("ERROR: Username and password does not match.");
         }
 
         const token = generateToken();
-        const formattedDate = date.format(new Date(), 'MM/DD/YYYY HH:mm:ss ZZ');
         await query(`UPDATE user_logins 
                         SET token='${token}', 
-                            last_login_at='${formattedDate}' 
+                            last_login_at='${date.format(new Date(), format)}' 
                         WHERE user_id=${userQuery.rows[0].user_id}`);
 
         const userRecord = await query(`
@@ -109,15 +116,19 @@ app.post('/login', async (req, res) => {
             WHERE a.id = ${userQuery.rows[0].user_id}`);
 
         console.log("Successfully logged in.");
-        res.send(userRecord.rows[0]);
+        return res.status(200).send(userRecord.rows[0]);
     }
     catch (err) {
-        console.error("Error during login: ", err.message);
+        return res.status(err.status).send("Error during login: ", err.message)
+    }
+    finally {
+        pool.release();
     }
 });
 
 app.post('/logout', async (req, res) => {
-    // INQUIRY ON PASSING TOKEN AS HEADER + VALIDATION 😭 //
+    const pool = await client.connect();
+
     const token = req.headers.authorization;
 
     if(!token) {
@@ -128,91 +139,139 @@ app.post('/logout', async (req, res) => {
         await query(`UPDATE user_logins SET token=null WHERE token='${token}'`);
 
         console.log("Successfully logged out.");
-        res.send({
+        res.status(200).send({
             success: true
         });
     }
     catch (err) {
-        console.error("Error during logout: ", err.message);
+        res.status(err.status).send("Error during logout: ", err.message);
+    }
+    finally {
+        pool.release();
     }
 });
 
 app.post('/posts/create', async (req, res) => {
+    const pool = await client.connect();
+
+    const token = req.headers.authorization;
+
+    if(!token) {
+        return res.status(401).send("ERROR: Unauthorized token.");
+    }
+    
     try {
         const user = req.body;
 
         if(!user.user_id || !user.content) {
-            return res.send("ERROR: Incomplete details.");
+            return res.status(400).send("ERROR: Incomplete details.");
         }
 
-        const formattedDate = date.format(new Date(), 'MM/DD/YYYY HH:mm:ss ZZ');
-
         const insertQuery = await query(`INSERT INTO posts (user_id, content, created_at) 
-                        VALUES (${user.user_id}, '${user.content}', '${formattedDate}')
-                        RETURNING id, content`);
+                                            VALUES (${user.user_id}, '${user.content}', '${date.format(new Date(), format)}')
+                                            RETURNING id, content`);
+
+        const recentPost = insertQuery.rows[0];
         
 
         console.log("Created new post.");
-        res.send({
-            id: insertQuery.rows[0].id,
-            content: insertQuery.rows[0].content
+        res.status(200).send({
+            id: recentPost.id,
+            content: recentPost.content
         });
     }
     catch (err) {
-        console.error("Error on post creation: ", err.message);
+        res.status(err.status).send("Error on post creation: ", err.message);
+    }
+    finally {
+        pool.release();
     }
 });
 
 app.post('/posts/update', async (req, res) => {
+    const pool = await client.connect();
+
+    const token = req.headers.authorization;
+
+    if(!token) {
+        return res.status(401).send("ERROR: Unauthorized token.");
+    }
+
     try {
         const user = req.body;
 
         if(!user.post_id || !user.content) {
-            return res.send("ERROR: Incomplete details.");
+            return res.status(400).send("ERROR: Incomplete details.");
         }
 
         const postQuery = await query(`SELECT * FROM posts WHERE id=${user.post_id}`);
         if(postQuery.rowCount === 0) {
-            return res.send("ERROR: Post does not exist.");
+            return res.status(400).send("ERROR: Post does not exist.");
         }
 
         const updateQuery = await query(`UPDATE posts SET content='${user.content}' WHERE id=${user.post_id} RETURNING id, content`);
         
+        const recentPost = updateQuery.rows[0];
+
         console.log("Updated post.");
-        res.send({
-            id: updateQuery.rows[0].id,
-            new_content: updateQuery.rows[0].content
+        res.status(200).send({
+            id: recentPost.id,
+            new_content: recentPost.content
         });
     }
     catch (err) {
-        console.error("Error on updating post: ", err.message);
+        res.status(err.status).send("Error on updating post: ", err.message);
+    }
+    finally {
+        pool.release();
     }
 });
 
 app.post('/posts/delete', async (req, res) => {
+    const pool = await client.connect();
+
     try {
+
+        const token = req.headers.authorization;
+    
+        if(!token) {
+            return res.status(401).send("ERROR: Unauthorized token.");
+        }
+        
         const user = req.body;
 
         if(!user.post_id) {
-            return res.send("ERROR: Incomplete details.");
+            return res.status(400).send("ERROR: Incomplete details.");
         }
 
-        const postQuery = await query(`SELECT * FROM posts WHERE id=${user.post_id}`);
-        if(postQuery.rowCount === 0) {
-            return res.send("ERROR: Post does not exist.");
-        }
-
-        const updateQuery = await query(`DELETE FROM posts WHERE id=${user.post_id} RETURNING id, content`);
+        const postQuery = await query(`SELECT * FROM posts a 
+                                        JOIN user_logins b ON a.user_id = b.user_id 
+                                        WHERE b.token = '${token}' AND a.id = ${user.post_id}`);
         
+        if(postQuery.rowCount === 0) {
+            return res.send(400).send("ERROR: Post does not exist on user.");
+        }
+
+        // const postQuery = await query(`SELECT * FROM posts WHERE id=${user.post_id}`);
+        // if(postQuery.rowCount === 0) {
+        //     return res.status(400).send("ERROR: Post does not exist.");
+        // }
+
+        const deleteQuery = await query(`DELETE FROM posts WHERE id=${user.post_id} RETURNING id, content`);
+        
+        const recentPost = deleteQuery.rows[0];
+
         console.log("Deleted post.");
         res.send({
             success: true,
-            id: updateQuery.rows[0].id,
-            new_content: updateQuery.rows[0].content
+            id: recentPost.id,
         });
     }
     catch (err) {
-        console.error("Error on updating post: ", err.message);
+        res.status(err.status).send("Error on post deletion: ", err.message);
+    }
+    finally {
+        pool.release();
     }
 });
 

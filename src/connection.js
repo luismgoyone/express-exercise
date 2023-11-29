@@ -1,8 +1,8 @@
 // import pkg from 'pg';
 // const { Client } = pkg;
-const { Client } = require('pg');
+const { Client, Pool } = require('pg');
 
-const client = new Client({
+const client = new Pool({
     host: "localhost",
     user: "postgres",
     port: 5432,
