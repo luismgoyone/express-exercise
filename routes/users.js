@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
 
 const db = require('../db/dbClient');
+
+require('dotenv').config();
+const { AUTH_SECRET } = process.env;
 
 function validateStringUserParam(field) {
   return body(field)
@@ -95,7 +99,7 @@ router.post('/login', async (req, res) => {
       username,
       password,
     })
-    .select('username')
+    .select('username', 'user_id')
     .from('user_logins')
     .returning('*');
   
@@ -110,7 +114,17 @@ router.post('/login', async (req, res) => {
     return;
   }
 
-  // TODO: generate and set token here?
+  const newLoginToken = jwt.sign(
+    {
+      username: userLoginMatchingRecord.username,
+      user_id: userLoginMatchingRecord.user_id,
+    },
+    AUTH_SECRET
+  );
+
+  console.log({ newLoginToken });
+
+  // TODO: set token on user_login record [?]
 
   // TODO: retrieve record from DB (USE JOIN)
   
