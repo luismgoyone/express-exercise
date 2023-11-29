@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // POST
 
 type Posts struct {
@@ -20,7 +22,8 @@ type User struct {
 func (user *User) isFirstNameValid() (bool, string) {
 	const maxCharLength = 20
 	if len(user.first_name) > maxCharLength {
-		return false, "First name must not exceed 20 characters"
+		errMsg := fmt.Sprintf("First name must not exceed %v characters", maxCharLength)
+		return false, errMsg
 	}
 	return true, ""
 }
@@ -28,7 +31,8 @@ func (user *User) isFirstNameValid() (bool, string) {
 func (user *User) isLastNameValid() (bool, string) {
 	const maxCharLength = 20
 	if len(user.last_name) > maxCharLength {
-		return false, "Last name must not exceed 20 characters"
+		errMsg := fmt.Sprintf("Last name must not exceed %v characters", maxCharLength)
+		return false, errMsg
 	}
 	return true, ""
 }
@@ -44,18 +48,24 @@ type UserLogin struct {
 }
 
 func (user_login *UserLogin) isUsernameValid() (bool, string) {
-	if len(user_login.username) > 20 {
-		return false, "User name must not exceed 20 characters"
+	const maxCharLength = 20
+	if len(user_login.username) > maxCharLength {
+		errMsg := fmt.Sprintf("User name must not exceed %v characters", maxCharLength)
+		return false, errMsg
 	}
 	return true, ""
 }
 
 func (user_login *UserLogin) isPasswordValid() (bool, string) {
-	if len(user_login.password) > 20 {
-		return false, "Password must not exceed 20 characters"
+	const maxCharLength = 20
+	const minCharLength = 8
+	if len(user_login.password) > maxCharLength {
+		errMsg := fmt.Sprintf("Password must not exceed %v characters", maxCharLength)
+		return false, errMsg
 	}
-	if len(user_login.password) < 8 {
-		return false, "Password must be at least 8 characters"
+	if len(user_login.password) < minCharLength {
+		errMsg := fmt.Sprintf("Password must be at least %v characters", minCharLength)
+		return false, errMsg
 	}
 	return true, ""
 }
