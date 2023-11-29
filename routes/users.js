@@ -150,7 +150,7 @@ router.post('/login', async (req, res) => {
   console.log({ userAndUserLoginRecord });
   
   // return user record (USE JOIN)
-  res.send(userAndUserLoginRecord);
+  res.json(userAndUserLoginRecord);
 
   // TODO: Fix `ERR_HTTP_HEADERS_SENT: Cannot set headers after they are sent to the client` error
 });
