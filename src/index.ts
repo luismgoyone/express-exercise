@@ -1,25 +1,20 @@
-import express, { Express, Request, Response } from "express";
+import express, { Request, Response } from "express";
 require("dotenv").config();
 import { json } from "body-parser";
-import { Pool } from "pg";
+import pool from "./db";
+import { setupRoutes } from "./routes";
 
 const port = process.env.PORT;
-const user = process.env.DB_USER;
-const host = process.env.DB_HOST;
-const database = process.env.DB_DATABASE;
-const password = process.env.DB_PASSWORD;
-const db_port = process.env.DB_PORT;
+
 const app = express();
 
 app.use(json());
 
-//database connection pool
-const pool = new Pool({
-  user,
-  host,
-  database,
-  password,
-  port: Number(db_port),
+// test db connection
+//-------------------------------------------------------------------
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle client", err);
+  process.exit(-1);
 });
 
 // test connect
@@ -43,11 +38,17 @@ pool.query("SELECT * FROM posts", (err, result) => {
     console.log("Query result:", result.rows);
   }
 });
+//-------------------------------------------------------------------
 
 // try endpoints implementation here...
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server 😀✅");
 });
+
+//----------------------------------------------------------------------
+// Setup routes
+setupRoutes(app);
+//----------------------------------------------------------------------
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
