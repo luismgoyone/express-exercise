@@ -125,10 +125,32 @@ router.post('/login', async (req, res) => {
   console.log({ newLoginToken });
 
   // TODO: set token on user_login record [?]
+  const [updatedUserLoginRecord] = await db('user_logins')
+    .where({
+      username,
+      password,
+    })
+    .update({
+      token: newLoginToken
+    }, ['username', 'token']);
 
-  // TODO: retrieve record from DB (USE JOIN)
+  console.log({ updatedUserLoginRecord });
+
+  // retrieve record from DB (USE JOIN)
+  const [userAndUserLoginRecord] = await db('users')
+    .join('user_logins', 'users.id', '=', 'user_logins.user_id')
+    .select(
+      'users.id',
+      'users.first_name',
+      'users.last_name',
+      'user_logins.username',
+      'user_logins.token'
+    );
+
+  console.log({ userAndUserLoginRecord });
   
-  // TODO: return user record (USE JOIN)
+  // return user record (USE JOIN)
+  res.send(userAndUserLoginRecord);
 });
 
 router.post('/logout', async (req, res) => {
