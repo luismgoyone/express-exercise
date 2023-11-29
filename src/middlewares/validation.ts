@@ -4,7 +4,6 @@ import { Request, Response, NextFunction } from "express";
 import { Knex } from "knex";
 
 import User from "../types/user";
-import { LogoutHeaders } from "../types/headers";
 
 export const validateRegisterPayload =
   (connector: Knex) =>
@@ -102,8 +101,7 @@ export const validateToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  const headers: LogoutHeaders = req.headers;
-  const token = headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     res.status(400).send({ error: "Unauthorized Error. No user token found." });
