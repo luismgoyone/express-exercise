@@ -40,7 +40,7 @@ type UserLogin struct {
 	token         string
 	last_login_at string
 	username      string // Max 20 chars
-	password      string // Max 20 chars
+	password      string // Min 8 chars, Max 20 chars
 }
 
 func (user_login *UserLogin) isUsernameValid() bool {
@@ -51,8 +51,26 @@ func (user_login *UserLogin) isUsernameValid() bool {
 }
 
 func (user_login *UserLogin) isPasswordValid() bool {
-	if len(user_login.password) > 20 {
+	if len(user_login.password) > 20 ||
+		len(user_login.password) < 8 {
 		return false
 	}
 	return true
+}
+
+// USER ACCOUNT
+
+type UserAccount struct {
+	User
+	UserLogin
+}
+
+func (user_account *UserAccount) isUserAccountValid() bool {
+	if user_account.isFirstNameValid() &&
+		user_account.isLastNameValid() &&
+		user_account.isPasswordValid() &&
+		user_account.isUserAccountValid() {
+		return true
+	}
+	return false
 }
