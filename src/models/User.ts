@@ -9,21 +9,11 @@ class User {
   static async register(data: Partial<UserFields>) {
     const connector = Db.getInstance()
 
+    const [result] = await connector('users').insert(data).returning<UserFields[]>(['*'])
 
     connector.destroy()
-  } 
-
-
-  static async insert(data: Partial<UserFields>) {
-    const connector = Db.getInstance()
-
-    // const [resultUser, resultUserLogin ] = await Promise.all([
-    //   connector('user').insert(),
-    //   connector('user_login')
-    // ])
-
-    connector.destroy()
-  }
+    return result
+  }  
 }
 
 export default User

@@ -13,11 +13,10 @@ const usernameValidator = async (request: ExpressCustomRequest<UserRegister> , r
     response.status(500).send('username is empty')
   }
 
-  const result = await UserLogin.getVerified({ username }) 
-  
-  if(username === result || !result) {
-    return response.status(500).send('username is already taken!')
+  const isUsernameTaken = await UserLogin.getVerified({ username })
 
+  if(isUsernameTaken) {
+    return response.status(500).send('username is already taken!')
   }
 
   console.log('username is good ✅\n')

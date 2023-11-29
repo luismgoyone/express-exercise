@@ -1,5 +1,5 @@
 type UserRegister = {
-  first_name: UserRegister
+  first_name: string
   last_name: string
   username: string
   password: string
