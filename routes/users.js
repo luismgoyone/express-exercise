@@ -29,8 +29,7 @@ router.post('/register', validationsRegisterEndpoint, async (req, res) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    res.status(400).json({ errors });
-    return;
+    return res.status(400).json({ errors });
   }
 
   const {
@@ -88,8 +87,7 @@ router.post('/login', async (req, res) => {
 
   // if username doesn't exist, return an error
   if (!userLoginRecordByUsername) {
-    res.status(400).send({ error: `User ${username} not found` });
-    return;
+    return res.status(400).send({ error: `User ${username} not found` });
   }
 
   const [userLoginMatchingRecord] = await db('user_logins')
@@ -108,8 +106,7 @@ router.post('/login', async (req, res) => {
     userLoginRecordByUsername &&
     !userLoginMatchingRecord
   ) {
-    res.status(400).send({ error: `Incorrect username or password` });
-    return;
+    return res.status(400).send({ error: `Incorrect username or password` });
   }
 
   const newLoginToken = jwt.sign(
