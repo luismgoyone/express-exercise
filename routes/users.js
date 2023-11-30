@@ -148,8 +148,67 @@ router.post('/login', async (req, res) => {
   res.json(userAndUserLoginRecord);
 });
 
+function verifyToken(authorization) {
+  if (!authorization) {
+    return {
+      isValid: false,
+      decodedData: null,
+    }
+  }
+
+  const token = authorization.split(' ')[1]; // Get <token> from "Bearer <token>"
+
+  const result = jwt.verify(token, AUTH_SECRET, (err, decodedData) => {
+    if (err) {
+      return {
+        isValid: false,
+        decodedData,
+      }
+    }
+
+    return {
+      isValid: true,
+      decodedData,
+    }
+  });
+
+  return result;
+}
+
 router.post('/logout', async (req, res) => {
-  // TODO: Implement
+  const { authorization } = req.headers;
+
+  if (!authorization) {
+    return res.status(401).json({ message: 'No `authorization` header provided' });
+  }
+
+  const {
+    isValid,
+    decodedData,
+  } = verifyToken(authorization);
+
+  if (!isValid) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+
+  if (!decodedData) {
+    return res.status(401).json({ message: 'Invalid decoded data' });
+  }
+
+  const { user_id } = decodedData;
+
+  const [updatedUserLoginRecord] = await db('user_logins')
+    .where({ user_id })
+    .update(
+      { token: null },
+      ['user_id', 'username']
+    );
+
+  if (!updatedUserLoginRecord) {
+    return res.status(401).json({ message: 'Logout failed' });
+  }
+
+  res.json({ success: true });
 });
 
 module.exports = router;
