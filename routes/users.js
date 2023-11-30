@@ -148,15 +148,15 @@ router.post('/login', async (req, res) => {
   res.json(userAndUserLoginRecord);
 });
 
-function verifyToken(authorization) {
-  if (!authorization) {
+function verifyToken(authorizationHeader) {
+  if (!authorizationHeader) {
     return {
       isValid: false,
       decodedData: null,
     }
   }
 
-  const token = authorization.split(' ')[1]; // Get <token> from "Bearer <token>"
+  const token = authorizationHeader.split(' ')[1]; // Get <token> from "Bearer <token>"
 
   const result = jwt.verify(token, AUTH_SECRET, (err, decodedData) => {
     if (err) {
@@ -176,16 +176,16 @@ function verifyToken(authorization) {
 }
 
 router.post('/logout', async (req, res) => {
-  const { authorization } = req.headers;
+  const { authorization: authorizationHeader } = req.headers;
 
-  if (!authorization) {
+  if (!authorizationHeader) {
     return res.status(401).json({ message: 'No `authorization` header provided' });
   }
 
   const {
     isValid,
     decodedData,
-  } = verifyToken(authorization);
+  } = verifyToken(authorizationHeader);
 
   if (!isValid) {
     return res.status(401).json({ message: 'Invalid token' });
