@@ -39,6 +39,41 @@ app.listen(port, () => {
 
 app.use(bodyParser.json());
 
+app.post('/create-table', async (req, res) => {
+    const pool = await client.connect();
+
+    try {
+        await query(`CREATE TABLE IF NOT EXISTS 
+                        public.posts (
+                            id integer NOT NULL DEFAULT nextval('posts_id_seq'::regclass),
+                            user_id integer,
+                            content text COLLATE pg_catalog."default",
+                            created_at timestamp with time zone,
+                            CONSTRAINT posts_pkey PRIMARY KEY (id))`);
+
+        await query(`CREATE TABLE IF NOT EXISTS 
+                        public.user_logins (
+                            user_id integer,
+                            token text COLLATE pg_catalog."default",
+                            last_login_at timestamp with time zone,
+                            username character varying(20) COLLATE pg_catalog."default",
+                            password character varying(20) COLLATE pg_catalog."default")`);
+
+        await query(`CREATE TABLE IF NOT EXISTS 
+                        public.users(
+                            id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
+                            first_name character varying(20) COLLATE pg_catalog."default",
+                            last_name character varying(20) COLLATE pg_catalog."default",
+                            CONSTRAINT users_pkey PRIMARY KEY (id))`);
+    }
+    catch (err) {
+        res.status(err.status).send("Error during create-table: ", err.message);
+    }
+    finally {
+        pool.release();
+    }
+});
+
 app.post('/register', async (req, res) => {
     const pool = await client.connect();
 
@@ -77,7 +112,7 @@ app.post('/register', async (req, res) => {
         res.status(200).send(userRecord.rows[0]);
     }
     catch (err) {
-        res.status(err.status).send("Error during registration: ", err.message)
+        res.status(err.status).send("Error during registration: ", err.message);
     }
     finally {
         pool.release();
@@ -204,9 +239,14 @@ app.post('/posts/update', async (req, res) => {
             return res.status(400).send("ERROR: Incomplete details.");
         }
 
-        const postQuery = await query(`SELECT * FROM posts WHERE id=${user.post_id}`);
+        console.log({query: `SELECT * FROM posts a JOIN user_logins b ON a.user_id = b.user_id WHERE b.token = '${token}' AND a.id = ${user.post_id}`});
+        
+        const postQuery = await query(`SELECT * FROM posts a 
+                                        JOIN user_logins b ON a.user_id = b.user_id 
+                                        WHERE b.token = '${token}' AND a.id = '${user.post_id}'`);
+        
         if(postQuery.rowCount === 0) {
-            return res.status(400).send("ERROR: Post does not exist.");
+            return res.status(404).send("ERROR: Post does not exist on user.");
         }
 
         const updateQuery = await query(`UPDATE posts SET content='${user.content}' WHERE id=${user.post_id} RETURNING id, content`);
@@ -215,8 +255,10 @@ app.post('/posts/update', async (req, res) => {
 
         console.log("Updated post.");
         res.status(200).send({
-            id: recentPost.id,
-            new_content: recentPost.content
+            updated: {
+                id: recentPost.id,
+                new_content: recentPost.content
+            }
         });
     }
     catch (err) {
@@ -231,7 +273,6 @@ app.post('/posts/delete', async (req, res) => {
     const pool = await client.connect();
 
     try {
-
         const token = req.headers.authorization;
     
         if(!token) {
@@ -249,7 +290,7 @@ app.post('/posts/delete', async (req, res) => {
                                         WHERE b.token = '${token}' AND a.id = ${user.post_id}`);
         
         if(postQuery.rowCount === 0) {
-            return res.send(400).send("ERROR: Post does not exist on user.");
+            return res.status(404).send("ERROR: Post does not exist on user.");
         }
 
         // const postQuery = await query(`SELECT * FROM posts WHERE id=${user.post_id}`);
@@ -262,9 +303,11 @@ app.post('/posts/delete', async (req, res) => {
         const recentPost = deleteQuery.rows[0];
 
         console.log("Deleted post.");
-        res.send({
-            success: true,
-            id: recentPost.id,
+        res.status(200).send({
+            deleted: {
+                success: true,
+                id: recentPost.id,
+            }
         });
     }
     catch (err) {
@@ -276,41 +319,66 @@ app.post('/posts/delete', async (req, res) => {
 });
 
 app.post('/posts/all', async (req, res) => {
+    const pool = await client.connect();
+
     try {
+        const token = req.headers.authorization;
+    
+        if(!token) {
+            return res.status(401).send("ERROR: Unauthorized token.");
+        }
+
         const allPostsQuery = await query(`SELECT a.id, a.content, b.first_name, b.last_name, c.username, a.created_at
                                             FROM posts a
                                             JOIN users b ON a.user_id = b.id
                                             JOIN user_logins c ON a.user_id = c.user_id
                                             ORDER BY a.created_at DESC`);
-        res.send({
+        res.status(200).send({
             data: allPostsQuery.rows
         });
     }
     catch (err) {
-        console.error("Error on displaying all posts: ", err.message);
+        res.status(err.status).send("Error on displaying all posts: ", err.message);
+    }
+    finally {
+        pool.release();
     }
 });
 
 app.post('/posts/user', async (req, res) => {
+    const pool = await client.connect();
+
     try {
+        const token = req.headers.authorization;
+        
+        if(!token) {
+            return res.status(401).send("ERROR: Unauthorized token.");
+        }
+        
         const user = req.body;
-
+        
         if(!user.user_id) {
-            return res.send("ERROR: Incomplete details.");
+            return res.status(400).send("ERROR: Incomplete details.");
         }
 
-        const postQuery = await query(`SELECT * FROM posts WHERE user_id=${user.user_id}`);
+        const postQuery = await query(`SELECT a.id, a.content FROM posts a 
+                                        JOIN user_logins b ON a.user_id = b.user_id 
+                                        WHERE b.token = '${token}' AND a.user_id = ${user.user_id}`);
+                                                                            
         if(postQuery.rowCount === 0) {
-            return res.send("ERROR: User has no post/s");
+            return res.status(404).send("ERROR: User has no post/s");
         }
 
-        const allPostsQuery = await query(`SELECT id, content
-                                            FROM posts WHERE user_id=${user.user_id}`);
+        // const allPostsQuery = await query(`SELECT id, content
+        //                                     FROM posts WHERE user_id=${user.user_id}`);
         res.send({
-            data: allPostsQuery.rows
+            data: postQuery.rows
         });
     }
     catch (err) {
-        console.error("Error on displaying user posts: ", err.message);
+        res.status(err.status).send("Error on displaying user posts: ", err.message);
+    }
+    finally {
+        pool.release();
     }
 });
