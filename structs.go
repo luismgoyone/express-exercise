@@ -37,6 +37,22 @@ func (user *User) isLastNameValid() (bool, string) {
 	return true, ""
 }
 
+func (user *User) isUserValid() (bool, []string) {
+	errors := []string{}
+	isUserValid := true
+	isFnValid, fnErr := user.isFirstNameValid()
+	isLnValid, lnErr := user.isLastNameValid()
+	if !isFnValid {
+		errors = append(errors, fnErr)
+		isUserValid = isFnValid
+	}
+	if !isLnValid {
+		errors = append(errors, lnErr)
+		isUserValid = isLnValid
+	}
+	return isUserValid, errors
+}
+
 // USER LOGIN
 
 type UserLogin struct {
@@ -70,6 +86,22 @@ func (user_login *UserLogin) isPasswordValid() (bool, string) {
 	return true, ""
 }
 
+func (user_login *UserLogin) isUserLoginValid() (bool, []string) {
+	errors := []string{}
+	isUserLoginValid := true
+	isUnValid, unErr := user_login.isUsernameValid()
+	isPwValid, pwErr := user_login.isPasswordValid()
+	if !isUnValid {
+		errors = append(errors, unErr)
+		isUserLoginValid = isUnValid
+	}
+	if !isPwValid {
+		errors = append(errors, pwErr)
+		isUserLoginValid = isPwValid
+	}
+	return isUserLoginValid, errors
+}
+
 // USER ACCOUNT
 
 type UserAccount struct {
@@ -81,26 +113,16 @@ func (user_account *UserAccount) isUserAccountValid() (bool, []string) {
 	errors := []string{}
 	isAccValid := true
 
-	isFnValid, fnErr := user_account.isFirstNameValid()
-	isLnValid, lnErr := user_account.isLastNameValid()
-	isUnValid, unErr := user_account.isUsernameValid()
-	isPwValid, pwErr := user_account.isPasswordValid()
+	isUserValid, userErr := user_account.isUserValid()
+	isUserLoginValid, loginErr := user_account.isUserLoginValid()
 
-	if !isFnValid {
-		errors = append(errors, fnErr)
-		isAccValid = isFnValid
+	if !isUserValid {
+		errors = append(errors, userErr...)
+		isAccValid = isUserValid
 	}
-	if !isLnValid {
-		errors = append(errors, lnErr)
-		isAccValid = isLnValid
-	}
-	if !isUnValid {
-		errors = append(errors, unErr)
-		isAccValid = isUnValid
-	}
-	if !isPwValid {
-		errors = append(errors, pwErr)
-		isAccValid = isPwValid
+	if !isUserLoginValid {
+		errors = append(errors, loginErr...)
+		isAccValid = isUserLoginValid
 	}
 
 	return isAccValid, errors
