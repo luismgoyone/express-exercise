@@ -20,33 +20,33 @@ app.get('/', (req, res) => {
   res.json({ message: 'Hello World' });
 });
 
-app.get('/posts', (req, res) => {
+app.get('/posts', async (req, res) => {
   // WIP
   let error = null;
 
   // NOTE: Just an example code for creating a table via the knex.schema API
   // TODO: Relocate to a JS file for schema-related functionalities
-  knex.schema.hasTable('posts')
-    .then((exists) => {
-      if (exists) {
-        console.info('table `posts` already exists');
-        return;
-      }
+  const hasPostsTable = await knex.schema.hasTable('posts');
 
-      return knex.schema.createTable('posts', (t) => {
-        t.integer('user_id').unsigned().references('id').inTable('users');
-        t.text('content').defaultTo(null);
-        t.timestamp('created_at', knex.fn.now());
-      });
-    })
-    .catch((err) => {
-      const message = 'Error creating table `posts`:' + err.message;
-      console.error(message);
-      error = { message };
-    })
-    .finally(() => {
-      knex.destroy();
+  if (hasPostsTable) {
+    const message = 'table `posts` already exists';
+    console.info(message);
+    return res.json({ message });
+  }
+
+  try {
+    await knex.schema.createTable('posts', (t) => {
+      t.integer('user_id').unsigned().references('id').inTable('users');
+      t.text('content').defaultTo(null);
+      t.timestamp('created_at', knex.fn.now());
     });
+  } catch(err) {
+    const message = 'Error creating table `posts`:' + err.message;
+    console.error(message);
+    error = { message };
+  } finally {
+    knex.destroy();
+  }
 
   if (error) {
     return res.status(500).json(error);
