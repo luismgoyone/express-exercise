@@ -38,7 +38,7 @@ app.get('/posts', async (req, res) => {
     await knex.schema.createTable('posts', (t) => {
       t.integer('user_id').unsigned().references('id').inTable('users');
       t.text('content').defaultTo(null);
-      t.timestamp('created_at', knex.fn.now());
+      t.timestamp('created_at').defaultTo(knex.fn.now());
     });
   } catch(err) {
     const message = 'Error creating table `posts`:' + err.message;
