@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // POST
 
@@ -19,26 +22,26 @@ type User struct {
 	last_name  string // Max 20 chars
 }
 
-func (user *User) isFirstNameValid() (bool, string) {
+func (user *User) isFirstNameValid() (bool, error) {
 	const maxCharLength = 20
 	if len(user.first_name) > maxCharLength {
 		errMsg := fmt.Sprintf("First name must not exceed %v characters", maxCharLength)
-		return false, errMsg
+		return false, errors.New(errMsg)
 	}
-	return true, ""
+	return true, nil
 }
 
-func (user *User) isLastNameValid() (bool, string) {
+func (user *User) isLastNameValid() (bool, error) {
 	const maxCharLength = 20
 	if len(user.last_name) > maxCharLength {
 		errMsg := fmt.Sprintf("Last name must not exceed %v characters", maxCharLength)
-		return false, errMsg
+		return false, errors.New(errMsg)
 	}
-	return true, ""
+	return true, nil
 }
 
-func (user *User) isUserValid() (bool, []string) {
-	var errors []string
+func (user *User) isUserValid() (bool, []error) {
+	var errors []error
 	isUserValid := true
 	isFnValid, fnErr := user.isFirstNameValid()
 	isLnValid, lnErr := user.isLastNameValid()
@@ -63,31 +66,31 @@ type UserLogin struct {
 	password      string // Min 8 chars, Max 20 chars
 }
 
-func (user_login *UserLogin) isUsernameValid() (bool, string) {
+func (user_login *UserLogin) isUsernameValid() (bool, error) {
 	const maxCharLength = 20
 	if len(user_login.username) > maxCharLength {
 		errMsg := fmt.Sprintf("User name must not exceed %v characters", maxCharLength)
-		return false, errMsg
+		return false, errors.New(errMsg)
 	}
-	return true, ""
+	return true, nil
 }
 
-func (user_login *UserLogin) isPasswordValid() (bool, string) {
+func (user_login *UserLogin) isPasswordValid() (bool, error) {
 	const maxCharLength = 20
 	const minCharLength = 8
 	if len(user_login.password) > maxCharLength {
 		errMsg := fmt.Sprintf("Password must not exceed %v characters", maxCharLength)
-		return false, errMsg
+		return false, errors.New(errMsg)
 	}
 	if len(user_login.password) < minCharLength {
 		errMsg := fmt.Sprintf("Password must be at least %v characters", minCharLength)
-		return false, errMsg
+		return false, errors.New(errMsg)
 	}
-	return true, ""
+	return true, nil
 }
 
-func (user_login *UserLogin) isUserLoginValid() (bool, []string) {
-	var errors []string
+func (user_login *UserLogin) isUserLoginValid() (bool, []error) {
+	var errors []error
 	isUserLoginValid := true
 	isUnValid, unErr := user_login.isUsernameValid()
 	isPwValid, pwErr := user_login.isPasswordValid()
@@ -109,8 +112,8 @@ type UserAccount struct {
 	UserLogin
 }
 
-func (user_account *UserAccount) isUserAccountValid() (bool, []string) {
-	var errors []string
+func (user_account *UserAccount) isUserAccountValid() (bool, []error) {
+	var errors []error
 	isAccValid := true
 
 	isUserValid, userErr := user_account.isUserValid()
