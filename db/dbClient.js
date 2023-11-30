@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const db = require('knex')({
+const knex = require('knex')({
   client: 'pg',
   connection: {
     host: process.env.DB_HOST,
@@ -11,4 +11,4 @@ const db = require('knex')({
   }
 });
 
-module.exports = db;
+module.exports = knex;

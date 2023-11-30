@@ -9,7 +9,7 @@ app.use(express.urlencoded({ extended: true }));
 // Parse application/json
 app.use(express.json());
 
-const db = require('./db/dbClient');
+const knex = require('./db/dbClient');
 
 // Middleware
 // ...

@@ -3,7 +3,7 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
-const db = require('../db/dbClient');
+const knex = require('../db/dbClient');
 
 require('dotenv').config();
 const { AUTH_SECRET } = process.env;
@@ -39,14 +39,14 @@ router.post('/register', validationsRegisterEndpoint, async (req, res) => {
     password,
   } = req.body;
 
-  const [returnedUser] = await db('users')
+  const [returnedUser] = await knex('users')
     .insert({
       first_name: first_name.trim(),
       last_name: last_name.trim(),
     })
     .returning('*');
 
-  const [returnedUserLogin] = await db('user_logins')
+  const [returnedUserLogin] = await knex('user_logins')
     .insert({
       user_id: returnedUser.id,
       username: username.trim(),
@@ -75,7 +75,7 @@ router.post('/login', async (req, res) => {
     password,
   } = req.body;
 
-  const [userLoginRecordByUsername] = await db('user_logins')
+  const [userLoginRecordByUsername] = await knex('user_logins')
     .where({ username })
     .select('username')
     .from('user_logins')
@@ -90,7 +90,7 @@ router.post('/login', async (req, res) => {
     return res.status(400).send({ error: `User ${username} not found` });
   }
 
-  const [userLoginMatchingRecord] = await db('user_logins')
+  const [userLoginMatchingRecord] = await knex('user_logins')
     .where({
       username,
       password,
@@ -119,20 +119,20 @@ router.post('/login', async (req, res) => {
 
   console.log({ newLoginToken });
 
-  const [updatedUserLoginRecord] = await db('user_logins')
+  const [updatedUserLoginRecord] = await knex('user_logins')
     .where({
       username,
       password,
     })
     .update({
       token: newLoginToken,
-      last_login_at: db.fn.now(),
+      last_login_at: knex.fn.now(),
     }, ['username', 'token']);
 
   console.log({ updatedUserLoginRecord });
 
   // retrieve record from DB (USE JOIN)
-  const [userAndUserLoginRecord] = await db('users')
+  const [userAndUserLoginRecord] = await knex('users')
     .join('user_logins', 'users.id', '=', 'user_logins.user_id')
     .select(
       'users.id',
@@ -197,7 +197,7 @@ router.post('/logout', async (req, res) => {
 
   const { user_id } = decodedData;
 
-  const [updatedUserLoginRecord] = await db('user_logins')
+  const [updatedUserLoginRecord] = await knex('user_logins')
     .where({ user_id })
     .update(
       { token: null },
