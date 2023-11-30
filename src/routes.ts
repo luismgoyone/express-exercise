@@ -70,21 +70,10 @@ export function setupRoutes(app: Express): void {
     try {
       const { username, password } = req.body;
 
-      // Check if the username exists
-      const userResult = await pool.query(
-        "SELECT * FROM user_logins WHERE username = $1",
-        [username]
-      );
-
-      if (userResult.rows.length === 0) {
-        return res.status(400).json({ error: "Invalid username or password." });
-      }
-
-      const userId = userResult.rows[0].id;
-
-      // Check if the username and password combination is valid
+      // Check if the username and password combi is valid
+      // TODO: Check if JOIN usage is correct
       const loginResult = await pool.query(
-        "SELECT * FROM user_logins WHERE username = $1 AND password = $2",
+        "SELECT users.id, first_name, last_name, username, token FROM users INNER JOIN user_logins ON users.id = user_logins.user_id WHERE username = $1 AND password = $2",
         [username, password]
       );
 
@@ -93,10 +82,10 @@ export function setupRoutes(app: Express): void {
       }
 
       const userRecord = {
-        id: userId,
-        first_name: userResult.rows[0].first_name,
-        last_name: userResult.rows[0].last_name,
-        username: username,
+        id: loginResult.rows[0].id,
+        first_name: loginResult.rows[0].first_name,
+        last_name: loginResult.rows[0].last_name,
+        username: loginResult.rows[0].username,
         token: loginResult.rows[0].token,
       };
 
