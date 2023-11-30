@@ -176,7 +176,7 @@ function verifyToken(authorizationHeader) {
 }
 
 router.post('/logout', async (req, res) => {
-  const { authorization: authorizationHeader } = req.headers;
+  const authorizationHeader = req.headers['Authorization'];
 
   if (!authorizationHeader) {
     return res.status(401).json({ message: 'No `authorization` header provided' });
