@@ -119,7 +119,6 @@ router.post('/login', async (req, res) => {
 
   console.log({ newLoginToken });
 
-  // TODO: set token on user_login record [?]
   const [updatedUserLoginRecord] = await db('user_logins')
     .where({
       username,
