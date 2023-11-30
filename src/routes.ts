@@ -37,20 +37,26 @@ export function setupRoutes(app: Express): void {
 
       const generatedToken = crypto.randomBytes(32).toString("hex");
       // Insert into user_logins table
-      const loginResult = await pool.query(
+      await pool.query(
         "INSERT INTO user_logins (user_id, token, last_login_at, username, password) VALUES ($1, $2, CURRENT_TIMESTAMP, $3, $4) RETURNING user_id, token, username",
         [userId, generatedToken, username, password]
       );
 
-      const userRecord = {
-        id: loginResult.rows[0].user_id,
-        first_name: userResult.rows[0].first_name,
-        last_name: userResult.rows[0].last_name,
-        username: loginResult.rows[0].username,
+      // Join users and user_logins tables to get a complete user record
+      const completeUserResult = await pool.query(
+        "SELECT users.id, first_name, last_name, username FROM users INNER JOIN user_logins ON users.id = user_logins.user_id WHERE users.id = $1",
+        [userId]
+      );
+
+      const completeUserRecord = {
+        id: completeUserResult.rows[0].id,
+        first_name: completeUserResult.rows[0].first_name,
+        last_name: completeUserResult.rows[0].last_name,
+        username: completeUserResult.rows[0].username,
       };
 
       console.log("success hehe!");
-      return res.status(201).json(userRecord);
+      return res.status(201).json(completeUserRecord);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal Server Error" });
