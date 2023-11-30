@@ -125,7 +125,8 @@ router.post('/login', async (req, res) => {
       password,
     })
     .update({
-      token: newLoginToken
+      token: newLoginToken,
+      last_login_at: db.fn.now(),
     }, ['username', 'token']);
 
   console.log({ updatedUserLoginRecord });
