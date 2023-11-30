@@ -38,7 +38,7 @@ func (user *User) isLastNameValid() (bool, string) {
 }
 
 func (user *User) isUserValid() (bool, []string) {
-	errors := []string{}
+	var errors []string
 	isUserValid := true
 	isFnValid, fnErr := user.isFirstNameValid()
 	isLnValid, lnErr := user.isLastNameValid()
@@ -87,7 +87,7 @@ func (user_login *UserLogin) isPasswordValid() (bool, string) {
 }
 
 func (user_login *UserLogin) isUserLoginValid() (bool, []string) {
-	errors := []string{}
+	var errors []string
 	isUserLoginValid := true
 	isUnValid, unErr := user_login.isUsernameValid()
 	isPwValid, pwErr := user_login.isPasswordValid()
@@ -110,7 +110,7 @@ type UserAccount struct {
 }
 
 func (user_account *UserAccount) isUserAccountValid() (bool, []string) {
-	errors := []string{}
+	var errors []string
 	isAccValid := true
 
 	isUserValid, userErr := user_account.isUserValid()
