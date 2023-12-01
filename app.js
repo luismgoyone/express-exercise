@@ -36,6 +36,7 @@ app.get('/create-posts-table', async (req, res) => {
 
   try {
     await knex.schema.createTable('posts', (t) => {
+      t.increments('id').primary();
       t.integer('user_id').unsigned().references('id').inTable('users');
       t.text('content').defaultTo(null);
       t.timestamp('created_at').defaultTo(knex.fn.now());
