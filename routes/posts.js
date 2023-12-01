@@ -24,8 +24,21 @@ router.get('/:id', async (req, res) => {
   // TODO: Implement retrieval of a single post by id
 });
 
-router.get('/user/:user_id', async (req, res) => {
-  // TODO: Implement retrieval of a user's posts
+router.get('/user/:user_id', verifyAuthorizationHeader, async (req, res) => {
+  // Retrieval of a user's posts
+
+  const { user_id } = req.params;
+
+  // TODO: Use express-validator middleware in validating req.params.user_id;
+  if (!user_id) {
+    return res.status(422).json({ message: 'No `user_id` param provided' });
+  }
+
+  const posts = await knex('posts')
+    .where({ user_id })
+    .returning('*');
+
+  res.json(posts);
 });
 
 router.post('/create', verifyAuthorizationHeader, async (req, res) => {
