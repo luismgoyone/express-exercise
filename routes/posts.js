@@ -11,10 +11,8 @@ const { AUTH_SECRET } = process.env;
 // imports for middleware
 const { verifyAuthorizationHeader } = require('../utils/verifyAuth');
 
-router.get('/all', async (req, res) => {
+router.get('/all', verifyAuthorizationHeader, async (req, res) => {
   // Retrieval of all posts
-
-  // TODO: Verify authorization header
 
   const posts = await knex('posts')
     .returning('*');
