@@ -21,7 +21,30 @@ router.get('/user/:user_id', async (req, res) => {
 });
 
 router.post('/create', async (req, res) => {
-  // TODO: Implement creation of a single post
+  // Creation of a single post
+
+  const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
+
+  if (!authorizationHeader) {
+    return res.status(401).json({ message: 'No `authorization` header provided' });
+  }
+
+  const {
+    user_id,
+    content,
+  } = req.body;
+
+  // TODO: Perform validations (using express-validator middleware)
+
+  const [newPost] = await knex('posts')
+    .insert({
+      user_id,
+      content: content.trim(),
+      created_at: knex.fn.now(),
+    })
+    .returning('*');
+
+  res.json(newPost);
 });
 
 router.put('/update/:id', async (req, res) => {
