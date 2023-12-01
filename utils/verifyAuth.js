@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { AUTH_SECRET } = process.env;
 
-module.exports.verifyAuthToken = (authorizationHeader) => {
+const verifyAuthToken = (authorizationHeader) => {
   if (!authorizationHeader) {
     console.error('no authorization header provided');
     return {
@@ -27,4 +27,32 @@ module.exports.verifyAuthToken = (authorizationHeader) => {
   });
 
   return result;
+}
+
+const verifyAuthorizationHeader = async (req, res, next) => { // middleware
+  const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
+
+  if (!authorizationHeader) {
+    return res.status(401).json({ message: 'No `authorization` header provided' });
+  }
+
+  const {
+    isValid,
+    decodedData,
+  } = verifyAuthToken(authorizationHeader);
+
+  if (!isValid) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+
+  if (!decodedData) {
+    return res.status(401).json({ message: 'Invalid decoded data' });
+  }
+
+  next();
+}
+
+module.exports = {
+  verifyAuthToken,
+  verifyAuthorizationHeader,
 }

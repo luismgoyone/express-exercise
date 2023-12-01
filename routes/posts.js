@@ -8,6 +8,9 @@ const knex = require('../db/dbClient');
 require('dotenv').config();
 const { AUTH_SECRET } = process.env;
 
+// imports for middleware
+const { verifyAuthorizationHeader } = require('../utils/verifyAuth');
+
 router.get('/all', async (req, res) => {
   // TODO: Implement retrieval of all posts
 });
@@ -20,7 +23,7 @@ router.get('/user/:user_id', async (req, res) => {
   // TODO: Implement retrieval of a user's posts
 });
 
-router.post('/create', async (req, res) => {
+router.post('/create', verifyAuthorizationHeader, async (req, res) => {
   // Creation of a single post
 
   const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
