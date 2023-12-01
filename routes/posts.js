@@ -12,7 +12,14 @@ const { AUTH_SECRET } = process.env;
 const { verifyAuthorizationHeader } = require('../utils/verifyAuth');
 
 router.get('/all', async (req, res) => {
-  // TODO: Implement retrieval of all posts
+  // Retrieval of all posts
+
+  // TODO: Verify authorization header
+
+  const posts = await knex('posts')
+    .returning('*');
+
+  res.json(posts);
 });
 
 router.get('/:id', async (req, res) => {
