@@ -3,6 +3,7 @@ const { AUTH_SECRET } = process.env;
 
 module.exports.verifyAuthToken = (authorizationHeader) => {
   if (!authorizationHeader) {
+    console.error('no authorization header provided');
     return {
       isValid: false,
       decodedData: null,
