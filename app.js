@@ -53,7 +53,7 @@ app.get('/create-posts-table', async (req, res) => {
     return res.status(500).json(error);
   }
 
-  res.json({ message: '`posts` table now ready' });
+  res.json({ message: '`posts` table created' });
 });
 
 app.listen(port, () => {
