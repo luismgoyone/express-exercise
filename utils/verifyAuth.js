@@ -1,4 +1,7 @@
-module.exports.verifyToken = (authorizationHeader) => {
+const jwt = require('jsonwebtoken');
+const { AUTH_SECRET } = process.env;
+
+module.exports.verifyAuthToken = (authorizationHeader) => {
   if (!authorizationHeader) {
     return {
       isValid: false,
