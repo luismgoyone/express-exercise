@@ -27,7 +27,9 @@ router.get('/:id', async (req, res) => {
 
   // TODO: Use express-validator middleware in validating req.params.id;
   if (!id) {
-    return res.status(422).json({ message: 'No `id` param provided' });
+    const message = 'No `id` param provided';
+    console.error(message);
+    return res.status(422).json({ message });
   }
 
   const [post] = await knex('posts')
@@ -44,7 +46,9 @@ router.get('/user/:user_id', verifyAuthorizationHeader, async (req, res) => {
 
   // TODO: Use express-validator middleware in validating req.params.user_id;
   if (!user_id) {
-    return res.status(422).json({ message: 'No `user_id` param provided' });
+    const message = 'No `user_id` param provided';
+    console.error(message);
+    return res.status(422).json({ message });
   }
 
   const posts = await knex('posts')
