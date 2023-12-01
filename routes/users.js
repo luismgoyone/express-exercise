@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
 const knex = require('../db/dbClient');
-const verifyAuthToken = require('../utils/verifyAuthToken');
+const verifyAuthToken = require('../utils/verifyAuth');
 
 require('dotenv').config();
 const { AUTH_SECRET } = process.env;
