@@ -21,7 +21,20 @@ router.get('/all', verifyAuthorizationHeader, async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  // TODO: Implement retrieval of a single post by id
+  // Retrieval of a single post by id
+
+  const { id } = req.params;
+
+  // TODO: Use express-validator middleware in validating req.params.id;
+  if (!id) {
+    return res.status(422).json({ message: 'No `id` param provided' });
+  }
+
+  const [post] = await knex('posts')
+    .where({ id })
+    .returning('*');
+
+  res.json(post);
 });
 
 router.get('/user/:user_id', verifyAuthorizationHeader, async (req, res) => {
