@@ -110,6 +110,8 @@ router.post('/login', async (req, res) => {
     return res.status(400).send({ error: `Incorrect username or password` });
   }
 
+  // TODO: Invalidate previous token (if there's any) [?]
+  // TODO: Set expiration logic for new token [?]
   const newLoginToken = jwt.sign(
     {
       username: userLoginMatchingRecord.username,
