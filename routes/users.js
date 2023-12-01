@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
 const knex = require('../db/dbClient');
+const verifyAuthToken = require('../utils/verifyAuthToken');
 
 require('dotenv').config();
 const { AUTH_SECRET } = process.env;
@@ -148,33 +149,6 @@ router.post('/login', async (req, res) => {
   res.json(userAndUserLoginRecord);
 });
 
-function verifyToken(authorizationHeader) {
-  if (!authorizationHeader) {
-    return {
-      isValid: false,
-      decodedData: null,
-    }
-  }
-
-  const token = authorizationHeader.split(' ')[1]; // Get <token> from "Bearer <token>"
-
-  const result = jwt.verify(token, AUTH_SECRET, (err, decodedData) => {
-    if (err) {
-      return {
-        isValid: false,
-        decodedData,
-      }
-    }
-
-    return {
-      isValid: true,
-      decodedData,
-    }
-  });
-
-  return result;
-}
-
 router.post('/logout', async (req, res) => {
   const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
 
@@ -185,7 +159,7 @@ router.post('/logout', async (req, res) => {
   const {
     isValid,
     decodedData,
-  } = verifyToken(authorizationHeader);
+  } = verifyAuthToken(authorizationHeader);
 
   if (!isValid) {
     return res.status(401).json({ message: 'Invalid token' });
