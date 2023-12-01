@@ -20,8 +20,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Hello World' });
 });
 
-app.get('/posts', async (req, res) => {
-  // WIP
+app.get('/create-posts-table', async (req, res) => {
   let error = null;
 
   // NOTE: Just an example code for creating a table via the knex.schema API
