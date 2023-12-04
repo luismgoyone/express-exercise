@@ -71,35 +71,35 @@ router.post('/create',
       .withMessage('String `content` cannot be an empty string')
   ],
   async (req, res) => {
-  // Creation of a single post
+    // Creation of a single post
 
-  const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
+    const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
 
-  if (!authorizationHeader) {
-    return res.status(401).json({ message: 'No `authorization` header provided' });
-  }
+    if (!authorizationHeader) {
+      return res.status(401).json({ message: 'No `authorization` header provided' });
+    }
 
-  const {
-    user_id,
-    content,
-  } = req.body;
-
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    console.error(errors);
-    return res.status(400).json({ errors });
-  }
-
-  const [newPost] = await knex('posts')
-    .insert({
+    const {
       user_id,
-      content: content.trim(),
-      created_at: knex.fn.now(),
-    })
-    .returning('*');
+      content,
+    } = req.body;
 
-  res.json(newPost);
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      console.error(errors);
+      return res.status(400).json({ errors });
+    }
+
+    const [newPost] = await knex('posts')
+      .insert({
+        user_id,
+        content: content.trim(),
+        created_at: knex.fn.now(),
+      })
+      .returning('*');
+
+    res.json(newPost);
   }
 );
 
