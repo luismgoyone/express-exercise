@@ -103,10 +103,33 @@ router.post('/create',
   }
 );
 
-router.put('/update/:id', async (req, res) => {
-  // TODO: Implement updating of a single post
+router.put('/update',
+  verifyAuthorizationHeader,
+  [
+    body('id').isInt(),
+    body('content').isString().isLength({ min: 1 })
+  ],
+  async (req, res) => {
+    // Updating of a single post
+    const errors = validationResult(req);
 
-});
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors });
+    }
+
+    const {
+      id,
+      content,
+    } = req.body;
+
+    const [updatedPost] = await knex('posts')
+      .where({ id })
+      .update({ content })
+      .returning('*');
+
+    res.json(updatedPost);
+  }
+);
 
 router.delete('/delete/:id', async (req, res) => {
   // TODO: Implement deletion of a single post
