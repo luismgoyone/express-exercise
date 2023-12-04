@@ -58,7 +58,19 @@ router.get('/user/:user_id', verifyAuthorizationHeader, async (req, res) => {
   res.json(posts);
 });
 
-router.post('/create', verifyAuthorizationHeader, async (req, res) => {
+router.post('/create',
+  verifyAuthorizationHeader,
+  [
+    body('user_id')
+      .isInt()
+      .withMessage('`user_id` must be an integer'),
+    body('content')
+      .isString()
+      .withMessage('`content` must be a string')
+      .isLength({ min: 1 })
+      .withMessage('String `content` cannot be an empty string')
+  ],
+  async (req, res) => {
   // Creation of a single post
 
   const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
@@ -72,7 +84,12 @@ router.post('/create', verifyAuthorizationHeader, async (req, res) => {
     content,
   } = req.body;
 
-  // TODO: Perform validations (using express-validator middleware)
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    console.error(errors);
+    return res.status(400).json({ errors });
+  }
 
   const [newPost] = await knex('posts')
     .insert({
@@ -83,10 +100,12 @@ router.post('/create', verifyAuthorizationHeader, async (req, res) => {
     .returning('*');
 
   res.json(newPost);
-});
+  }
+);
 
 router.put('/update/:id', async (req, res) => {
   // TODO: Implement updating of a single post
+
 });
 
 router.delete('/delete/:id', async (req, res) => {
