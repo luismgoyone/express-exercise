@@ -145,7 +145,7 @@ router.put('/update',
     const [updatedPost] = await knex('posts')
       .where({ id })
       .update({ content })
-      .returning('*');
+      .returning(['id', 'content']);
 
     res.json(updatedPost);
   }
