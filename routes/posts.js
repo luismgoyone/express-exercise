@@ -69,7 +69,7 @@ router.get('/user/:user_id',
 
     const posts = await knex('posts')
       .where({ user_id })
-      .returning('*');
+      .returning(['id', 'content']);
 
     res.json(posts);
   }
