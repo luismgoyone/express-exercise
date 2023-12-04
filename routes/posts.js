@@ -114,7 +114,7 @@ router.post('/create',
         content: content.trim(),
         created_at: knex.fn.now(),
       })
-      .returning('*');
+      .returning(['id', 'content']);
 
     res.json(newPost);
   }
