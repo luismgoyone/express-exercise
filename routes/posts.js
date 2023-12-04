@@ -111,6 +111,9 @@ router.put('/update',
   ],
   async (req, res) => {
     // Updating of a single post
+
+    // TODO: Add validation to allow updating to the post's owner only (via post.user_id and token)
+
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -133,6 +136,8 @@ router.put('/update',
 
 router.delete('/delete/:id', async (req, res) => {
   // TODO: Implement deletion of a single post
+
+  // TODO: Add validation to allow updating to the post's owner only (via post.user_id and token)
 });
 
 module.exports = router;
