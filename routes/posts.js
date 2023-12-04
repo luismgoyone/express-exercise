@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
 const knex = require('../db/dbClient');
@@ -20,43 +20,60 @@ router.get('/all', verifyAuthorizationHeader, async (req, res) => {
   res.json(posts);
 });
 
-router.get('/:id', async (req, res) => {
-  // Retrieval of a single post by id
+router.get('/:id',
+  [param('id').isInt()],
+  async (req, res) => {
+    // Retrieval of a single post by id
 
-  const { id } = req.params;
+    const errors = validationResult(req);
 
-  // TODO: Use express-validator middleware in validating req.params.id;
-  if (!id) {
-    const message = 'No `id` param provided';
-    console.error(message);
-    return res.status(422).json({ message });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors });
+    }
+
+    const { id } = req.params;
+
+    if (!id) {
+      const message = 'No `id` param provided';
+      console.error(message);
+      return res.status(422).json({ message });
+    }
+
+    const [post] = await knex('posts')
+      .where({ id })
+      .returning('*');
+
+    res.json(post);
   }
+);
 
-  const [post] = await knex('posts')
-    .where({ id })
-    .returning('*');
+router.get('/user/:user_id',
+  [param('user_id').isInt()],
+  verifyAuthorizationHeader,
+  async (req, res) => {
+    const errors = validationResult(req);
 
-  res.json(post);
-});
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors });
+    }
 
-router.get('/user/:user_id', verifyAuthorizationHeader, async (req, res) => {
-  // Retrieval of a user's posts
+    // Retrieval of a user's posts
 
-  const { user_id } = req.params;
+    const { user_id } = req.params;
 
-  // TODO: Use express-validator middleware in validating req.params.user_id;
-  if (!user_id) {
-    const message = 'No `user_id` param provided';
-    console.error(message);
-    return res.status(422).json({ message });
+    if (!user_id) {
+      const message = 'No `user_id` param provided';
+      console.error(message);
+      return res.status(422).json({ message });
+    }
+
+    const posts = await knex('posts')
+      .where({ user_id })
+      .returning('*');
+
+    res.json(posts);
   }
-
-  const posts = await knex('posts')
-    .where({ user_id })
-    .returning('*');
-
-  res.json(posts);
-});
+);
 
 router.post('/create',
   verifyAuthorizationHeader,
