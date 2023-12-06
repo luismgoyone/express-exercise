@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // CREATE
 
 func insertUser(user User) (int, error) {
@@ -11,7 +13,7 @@ func insertUser(user User) (int, error) {
 	row := db.QueryRow(sqlStatement, user.first_name, user.last_name)
 	err := row.Scan(&id)
 	if err != nil {
-		panic(err)
+		return 0, fmt.Errorf("insertUser: %v", err)
 	}
 	return id, err
 }
