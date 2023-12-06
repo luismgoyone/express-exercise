@@ -58,6 +58,8 @@ const verifyAuthorizationHeader = async (req, res, next) => { // middleware
     return res.status(401).json({ message: 'Invalid decoded auth data' });
   }
 
+  req.decodedAuthData = decodedAuthData;
+
   next();
 }
 
