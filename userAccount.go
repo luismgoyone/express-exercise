@@ -2,6 +2,28 @@ package main
 
 import "fmt"
 
+func addUserAccount(userAccount *UserAccount) (UserAccount, error) {
+	userId, err := insertUser(userAccount.User)
+	if err != nil {
+		return *userAccount, err
+	}
+	userAccount.id = userId
+	userAccount.user_id = userId
+
+	userLoginId, err := insertUserLogin(userAccount.UserLogin)
+	if err != nil {
+		return *userAccount, err
+	}
+
+	newUserAccount, err := getUserAccount(userId)
+	if err != nil {
+		fmt.Print(userId, userLoginId, userAccount.id, userAccount.user_id)
+		return *userAccount, err
+	}
+
+	return newUserAccount, nil
+}
+
 func getUserAccount(userId int) (UserAccount, error) {
 	var userAccount UserAccount
 	sqlStatement := `
