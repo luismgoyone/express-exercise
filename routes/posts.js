@@ -11,15 +11,8 @@ const { AUTH_SECRET } = process.env;
 // imports for middleware
 const { verifyAuthorizationHeader } = require('../utils/verifyAuth');
 
-router.get('/all', verifyAuthorizationHeader, async (req, res) => {
-  // Retrieval of all posts
-
-  const posts = await knex('posts')
-    .orderBy('created_at', 'desc')
-    .returning('*');
-
-  // TODO: Shape of return value should be:
-  /*
+/**
+ * TODO: Rewrite in proper JSDoc format
     [
       {
         "id": <post id>,
@@ -30,7 +23,32 @@ router.get('/all', verifyAuthorizationHeader, async (req, res) => {
       },
       ...
     ]
-  */
+ */
+router.get('/all', verifyAuthorizationHeader, async (req, res) => {
+  // Retrieval of all posts
+
+  let posts = [];
+
+  try {
+    posts = await knex
+      .select(
+        'posts.id',
+        'posts.user_id',
+        'posts.content',
+        'users.first_name',
+        'users.last_name',
+        'user_logins.username'
+      )
+      .from('posts')
+      .leftJoin('users', 'users.id', '=', 'posts.user_id')
+      .leftJoin('user_logins', 'user_logins.user_id', '=', 'users.id')
+      .orderBy('created_at', 'desc');
+  } catch(err) {
+    console.error(err);
+    return res.status(400).json({ error: err });
+  }
+
+  posts.map(post => { delete post.user_id; });
 
   res.json(posts);
 });
