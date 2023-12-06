@@ -15,9 +15,9 @@ router.get('/all', verifyAuthorizationHeader, async (req, res) => {
   // Retrieval of all posts
 
   const posts = await knex('posts')
+    .orderBy('created_at', 'desc')
     .returning('*');
 
-  // TODO: Posts should be sorted by most recent `created_at`
   // TODO: Shape of return value should be:
   /*
     [
