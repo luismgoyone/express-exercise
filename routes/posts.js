@@ -206,8 +206,6 @@ router.delete('/delete',
   async (req, res) => {
     // Deletion of a single post
 
-    // TODO: Add validation to allow updating to the post's owner only (via post.user_id and token)
-
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -215,6 +213,31 @@ router.delete('/delete',
     }
 
     const { id } = req.body;
+
+    // Query existing post beforehand
+
+    let existingPost = null;
+
+    try {
+      existingPost = await knex('posts')
+        .where('id', id)
+        .first();
+    } catch(err) {
+      console.error(err);
+      return res.status(400).json({ errors: err });
+    }
+
+    if (!existingPost) {
+      return res.status(400).json({ errors: err });
+    }
+
+    // Validation to allow updating to the post's owner only (via post.user_id and token)
+    const decodedUserId = req?.decodedAuthData?.user_id;
+    const isOwner = (decodedUserId === existingPost.user_id);
+
+    if (!isOwner) {
+      return res.status(401).json({ message: 'Unauthorized edit access' });
+    }
 
     const [deletedPost] = await knex('posts')
       .where({ id })
