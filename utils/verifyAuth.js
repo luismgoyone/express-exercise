@@ -15,23 +15,23 @@ const verifyAuthToken = (authorizationHeader) => {
     console.error('no authorization header provided');
     return {
       isValid: false,
-      decodedData: null,
+      decodedAuthData: null,
     }
   }
 
   const token = parseTokenFromAuthHeader(authorizationHeader);
 
-  const result = jwt.verify(token, AUTH_SECRET, (err, decodedData) => {
+  const result = jwt.verify(token, AUTH_SECRET, (err, decodedAuthData) => {
     if (err) {
       return {
         isValid: false,
-        decodedData,
+        decodedAuthData,
       }
     }
 
     return {
       isValid: true,
-      decodedData,
+      decodedAuthData,
     }
   });
 
@@ -47,15 +47,15 @@ const verifyAuthorizationHeader = async (req, res, next) => { // middleware
 
   const {
     isValid,
-    decodedData,
+    decodedAuthData,
   } = verifyAuthToken(authorizationHeader);
 
   if (!isValid) {
     return res.status(401).json({ message: 'Invalid token' });
   }
 
-  if (!decodedData) {
-    return res.status(401).json({ message: 'Invalid decoded data' });
+  if (!decodedAuthData) {
+    return res.status(401).json({ message: 'Invalid decoded auth data' });
   }
 
   next();

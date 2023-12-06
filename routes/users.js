@@ -112,6 +112,7 @@ router.post('/login', async (req, res) => {
 
   // TODO: Invalidate previous token (if there's any) [?]
   // TODO: Set expiration logic for new token [?]
+
   const newLoginToken = jwt.sign(
     {
       username: userLoginMatchingRecord.username,
@@ -160,18 +161,18 @@ router.post('/logout', async (req, res) => {
 
   const {
     isValid,
-    decodedData,
+    decodedAuthData,
   } = verifyAuthToken(authorizationHeader);
 
   if (!isValid) {
     return res.status(401).json({ message: 'Invalid token' });
   }
 
-  if (!decodedData) {
+  if (!decodedAuthData) {
     return res.status(401).json({ message: 'Invalid decoded data' });
   }
 
-  const { user_id } = decodedData;
+  const { user_id } = decodedAuthData;
 
   const [updatedUserLoginRecord] = await knex('user_logins')
     .where({ user_id })
