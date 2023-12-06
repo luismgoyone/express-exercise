@@ -176,6 +176,8 @@ router.put('/update',
     const decodedUserId = req?.decodedAuthData?.user_id;
     const isOwner = (decodedUserId === existingPost.user_id);
 
+    // TODO: Perform validation of the current token against user_login.token
+
     if (!isOwner) {
       return res.status(401).json({ message: 'Unauthorized edit access' });
     }
@@ -234,6 +236,8 @@ router.delete('/delete',
     // Validation to allow updating to the post's owner only (via post.user_id and token)
     const decodedUserId = req?.decodedAuthData?.user_id;
     const isOwner = (decodedUserId === existingPost.user_id);
+
+    // TODO: Perform validation of the current token against user_login.token
 
     if (!isOwner) {
       return res.status(401).json({ message: 'Unauthorized edit access' });
