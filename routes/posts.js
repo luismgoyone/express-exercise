@@ -5,9 +5,6 @@ const jwt = require('jsonwebtoken');
 
 const knex = require('../db/dbClient');
 
-require('dotenv').config();
-const { AUTH_SECRET } = process.env;
-
 // imports for middleware
 const { verifyAuthorizationHeader } = require('../utils/verifyAuth');
 
