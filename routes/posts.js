@@ -180,10 +180,21 @@ router.put('/update',
       return res.status(401).json({ message: 'Unauthorized edit access' });
     }
 
-    const [updatedPost] = await knex('posts')
-      .where({ id })
-      .update({ content })
-      .returning(['id', 'content']);
+    let updatedPost = null;
+
+    try {
+      [updatedPost] = await knex('posts')
+        .where({ id })
+        .update({ content })
+        .returning(['id', 'content']);
+    } catch(err) {
+      console.error(err);
+      return res.status(400).json({ errors: err });
+    }
+
+    if (!existingPost) {
+      return res.status(400).json({ errors: err });
+    }
 
     res.json(updatedPost);
   }
