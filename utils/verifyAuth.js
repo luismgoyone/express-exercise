@@ -1,6 +1,15 @@
 const jwt = require('jsonwebtoken');
 const { AUTH_SECRET } = process.env;
 
+const parseTokenFromAuthHeader = (authorizationHeader) => {
+  return (
+    authorizationHeader &&
+    typeof authorizationHeader === 'string' &&
+    authorizationHeader.length
+  ) ? authorizationHeader.split(' ')[1] // Get <token> from "Bearer <token>"
+    : '';
+}
+
 const verifyAuthToken = (authorizationHeader) => {
   if (!authorizationHeader) {
     console.error('no authorization header provided');
@@ -10,7 +19,7 @@ const verifyAuthToken = (authorizationHeader) => {
     }
   }
 
-  const token = authorizationHeader.split(' ')[1]; // Get <token> from "Bearer <token>"
+  const token = parseTokenFromAuthHeader(authorizationHeader);
 
   const result = jwt.verify(token, AUTH_SECRET, (err, decodedData) => {
     if (err) {
@@ -53,6 +62,7 @@ const verifyAuthorizationHeader = async (req, res, next) => { // middleware
 }
 
 module.exports = {
+  parseTokenFromAuthHeader,
   verifyAuthToken,
   verifyAuthorizationHeader,
 }
