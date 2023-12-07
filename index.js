@@ -9,7 +9,7 @@ app.get('/', (request, response) => {
   response.send('Hello World');
 });
 
-app.use('/api/v1/users', userRoutes);
+app.use('/api/v1', userRoutes);
 
 app.listen(port, () => {
   console.log('server started');
