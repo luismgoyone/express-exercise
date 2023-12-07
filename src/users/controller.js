@@ -46,7 +46,7 @@ const addUser = async (req, res) => {
     // Fetch registered user information
     const result = await pool.query(queries.getRegisteredUser, [userId]);
       // Send the registered user information in the response
-      res.status(201).json(result.rows[0]);
+    res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Error adding user:', error);
     // Rollback on error
