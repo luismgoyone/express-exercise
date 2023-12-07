@@ -9,9 +9,14 @@ const addUser = async (req, res) => {
     if (results.rows.length) {
       res.send('Username already exists');
   try {
+    await pool.query('BEGIN');
+      // Username already exists, rollback and send response
+      await pool.query('ROLLBACK');
     }
     if (password.length < 8) {
       res.send('Password is too short');
+      // Password is too short, rollback and send response
+      await pool.query('ROLLBACK');
     }
     pool.query(
       queries.insertUserToUsersTable,
@@ -34,6 +39,8 @@ const addUser = async (req, res) => {
             });
           }
         );
+    // Commit the transaction
+    await pool.query('COMMIT');
       }
     );
   });
