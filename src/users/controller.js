@@ -1,3 +1,4 @@
+const helper = require('../commons/js/generateAuth');
 const pool = require('../../databasepg');
 const queries = require('./queries');
 
@@ -21,7 +22,7 @@ const addUser = (req, res) => {
 
         pool.query(
           queries.insertUserToUserLoginsTable,
-          [userId, '', username, password],
+          [userId, helper.getAuthToken(), username, password],
           (error) => {
             if (error) throw error;
 
