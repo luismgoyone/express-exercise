@@ -25,7 +25,7 @@ const addUser = (req, res) => {
           (error) => {
             if (error) throw error;
 
-            pool.query(query.getRegisteredUser, [userId], (error, result) => {
+            pool.query(queries.getRegisteredUser, [userId], (error, result) => {
               if (error) throw error;
 
               res.status(201).json(result.rows[0]);
