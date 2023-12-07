@@ -1,4 +1,4 @@
-const helper = require('../commons/js/generateAuth');
+const { getAuthToken } = require('../commons/js/authorization');
 const pool = require('../../databasepg');
 const queries = require('./queries');
 
