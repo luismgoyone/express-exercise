@@ -44,18 +44,9 @@ const addUser = async (req, res) => {
     await pool.query('COMMIT');
 
     // Fetch registered user information
-    await pool.query(queries.getRegisteredUser, [userId], (error, result) => {
-      if (error) {
-        console.error('Error fetching user information:', error);
-        // Handle error and send response
-        res
-          .status(500)
-          .json({ success: false, message: 'Internal Server Error' });
-      } else {
-        // Send the registered user information in the response
-        res.status(201).json(result.rows[0]);
-      }
-    });
+    const result = await pool.query(queries.getRegisteredUser, [userId]);
+      // Send the registered user information in the response
+      res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Error adding user:', error);
     // Rollback on error
