@@ -8,6 +8,7 @@ const addUser = (req, res) => {
   pool.query(queries.validateUsername, [username], (error, results) => {
     if (results.rows.length) {
       res.send('Username already exists');
+  try {
     }
     if (password.length < 8) {
       res.send('Password is too short');
@@ -36,6 +37,12 @@ const addUser = (req, res) => {
       }
     );
   });
+  } catch (error) {
+    console.error('Error adding user:', error);
+    // Rollback on error
+    await pool.query('ROLLBACK');
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
 };
 
 const getUsers = (req, res) => {
