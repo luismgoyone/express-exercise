@@ -2,7 +2,7 @@ const { getAuthToken } = require('../commons/js/authorization');
 const pool = require('../../databasepg');
 const queries = require('./queries');
 
-const addUser = (req, res) => {
+const addUser = async (req, res) => {
   const { first_name, last_name, username, password } = req.body;
 
   pool.query(queries.validateUsername, [username], (error, results) => {
