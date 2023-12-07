@@ -46,12 +46,16 @@ func main() {
 }
 
 type ErrorJson struct {
-	Errors []error `json:"errors"`
+	Errors []string `json:"errors"`
 }
 
 func jsonifyErrors(errors []error) ErrorJson {
+	var errorTexts []string
+	for _, err := range errors {
+		errorTexts = append(errorTexts, err.Error())
+	}
 	jsonErrors := ErrorJson{
-		Errors: errors,
+		Errors: errorTexts,
 	}
 
 	return jsonErrors
@@ -97,10 +101,6 @@ func postUserAccount(c *gin.Context) {
 
 	isUserAccountValid, errs := newUserAccount.isUserAccountValid()
 	if !isUserAccountValid {
-		for _, err := range errs {
-			errs = append(errs, err)
-		}
-
 		c.IndentedJSON(http.StatusBadRequest, jsonifyErrors(errs))
 		panic(errs)
 	}
