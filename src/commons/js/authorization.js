@@ -16,8 +16,7 @@ function generateAuthToken(length = 32) {
 async function getAuthToken() {
   try {
     const token = await generateAuthToken(32);
-    console.log('Generated Token:', token);
-    // Use the token as needed
+
     return token;
   } catch (error) {
     console.error('Error generating token:', error);
