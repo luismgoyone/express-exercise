@@ -13,13 +13,13 @@ const addUser = async (req, res) => {
     if (usernameRow.rows.length) {
       // Username already exists, rollback and send response
       await pool.query('ROLLBACK');
-      return res.send('Username already exists');
+      return res.status(400).send('Username already exists');
     }
 
     if (password.length < 8) {
       // Password is too short, rollback and send response
       await pool.query('ROLLBACK');
-      return res.send('Password is too short');
+      return res.status(400).send('Password is too short');
     }
 
     // Insert into users table
