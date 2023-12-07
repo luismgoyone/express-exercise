@@ -14,7 +14,7 @@ const addUser = (req, res) => {
     pool.query(
       queries.insertUserToUsersTable,
       [first_name, last_name],
-      (error, results) => {
+      (error, userResult) => {
         if (error) throw error;
 
         const userId = userResult.rows[0].id;
