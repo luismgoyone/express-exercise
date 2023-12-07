@@ -5,45 +5,57 @@ const queries = require('./queries');
 const addUser = async (req, res) => {
   const { first_name, last_name, username, password } = req.body;
 
-  pool.query(queries.validateUsername, [username], (error, results) => {
-    if (results.rows.length) {
-      res.send('Username already exists');
   try {
     await pool.query('BEGIN');
+    // Validate username case-insensitively
+    const usernameRow = await pool.query(queries.validateUsername, [username]);
+
+    if (usernameRow.rows.length) {
       // Username already exists, rollback and send response
       await pool.query('ROLLBACK');
+      return res.send('Username already exists');
     }
+
     if (password.length < 8) {
-      res.send('Password is too short');
       // Password is too short, rollback and send response
       await pool.query('ROLLBACK');
+      return res.send('Password is too short');
     }
-    pool.query(
-      queries.insertUserToUsersTable,
-      [first_name, last_name],
-      (error, userResult) => {
-        if (error) throw error;
 
-        const userId = userResult.rows[0].id;
+    // Insert into users table
+    const userResult = await pool.query(queries.insertUserToUsersTable, [
+      first_name,
+      last_name,
+    ]);
 
-        pool.query(
-          queries.insertUserToUserLoginsTable,
-          [userId, helper.getAuthToken(), username, password],
-          (error) => {
-            if (error) throw error;
+    const userId = userResult.rows[0].id;
 
-            pool.query(queries.getRegisteredUser, [userId], (error, result) => {
-              if (error) throw error;
+    // Generate authentication token
+    const authToken = await getAuthToken();
 
-              res.status(201).json(result.rows[0]);
-            });
-          }
-        );
+    // Insert into user_logins table
+    await pool.query(queries.insertUserToUserLoginsTable, [
+      userId,
+      authToken,
+      username,
+      password,
+    ]);
     // Commit the transaction
     await pool.query('COMMIT');
+
+    // Fetch registered user information
+    await pool.query(queries.getRegisteredUser, [userId], (error, result) => {
+      if (error) {
+        console.error('Error fetching user information:', error);
+        // Handle error and send response
+        res
+          .status(500)
+          .json({ success: false, message: 'Internal Server Error' });
+      } else {
+        // Send the registered user information in the response
+        res.status(201).json(result.rows[0]);
       }
-    );
-  });
+    });
   } catch (error) {
     console.error('Error adding user:', error);
     // Rollback on error
