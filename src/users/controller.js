@@ -2,7 +2,7 @@ const { getAuthToken } = require('../commons/js/authorization');
 const pool = require('../../databasepg');
 const queries = require('./queries');
 
-const addUser = async (req, res) => {
+const registerUser = async (req, res) => {
   const { first_name, last_name, username, password } = req.body;
 
   try {
@@ -99,7 +99,7 @@ const getUsers = (req, res) => {
 // }
 
 module.exports = {
-  addUser,
+  registerUser,
   loginUser,
   getUsers,
 };
