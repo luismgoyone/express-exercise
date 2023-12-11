@@ -94,9 +94,34 @@ const loginUser = async (req, res) => {
     res.status(201).json(loggedInUser.rows[0]);
   } catch (error) {
     console.error('Error logging in:', error);
+const logoutUser = async (req, res) => {
+  const { token } = req.headers;
+
+  try {
+    await pool.query('BEGIN');
+    const validatedToken = await pool.query(queries.validateToken, [token]);
+
+    if (!validatedToken.rows.length) {
+      await pool.query('ROLLBACK');
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid token.' });
+    }
+
+    const userId = validatedToken.rows[0].user_id;
+
+    await pool.query('COMMIT');
+
+    await pool.query(queries.updateToken, [null, userId]);
+
+    res.status(201).json({ success: true });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    await pool.query('ROLLBACK');
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
 const getUsers = (req, res) => {
   pool.query(queries.getUsers, (error, results) => {
     if (error) throw error;
@@ -111,5 +136,6 @@ const getUsers = (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
   getUsers,
 };
