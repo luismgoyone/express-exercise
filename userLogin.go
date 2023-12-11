@@ -20,6 +20,30 @@ func insertUserLogin(userLogin UserLogin) (int, error) {
 
 // READ
 
+func checkUsernameDuplicates(newUsername string) error {
+
+	var username string
+	var errMsg error = nil
+	noDuplicatesError := "sql: no rows in result set"
+	sqlStatement := `
+		SELECT username
+		FROM user_logins
+		WHERE username=$1
+	`
+	row := db.QueryRow(sqlStatement, newUsername)
+	err := row.Scan(&username)
+
+	if err != nil && err.Error() != noDuplicatesError {
+		errMsg = fmt.Errorf("checkUsernameDuplicates: %v", err)
+	}
+
+	if newUsername == username {
+		errMsg = fmt.Errorf("The username '%v' is already taken", newUsername)
+	}
+
+	return errMsg
+}
+
 // UPDATE
 
 // DELETE

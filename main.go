@@ -105,6 +105,13 @@ func postUserAccount(c *gin.Context) {
 		panic(errs)
 	}
 
+	err = checkUsernameDuplicates((&newUserAccount).username)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusConflict, jsonifyErrors(errs))
+		panic(errs)
+	}
+
 	newUserAccount, err = addUserAccount(&newUserAccount)
 	if err != nil {
 		errs = append(errs, err)
@@ -120,5 +127,4 @@ func postUserAccount(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, createdUser)
-
 }
