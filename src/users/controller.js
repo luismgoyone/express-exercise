@@ -30,13 +30,9 @@ const registerUser = async (req, res) => {
 
     const userId = userResult.rows[0].id;
 
-    // Generate authentication token
-    const authToken = await getAuthToken();
-
     // Insert into user_logins table
     await pool.query(queries.insertUserToUserLoginsTable, [
       userId,
-      authToken,
       username,
       password,
     ]);
