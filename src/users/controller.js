@@ -13,13 +13,17 @@ const registerUser = async (req, res) => {
     if (usernameRow.rows.length) {
       // Username already exists, rollback and send response
       await pool.query('ROLLBACK');
-      return res.status(400).send('Username already exists');
+      return res
+        .status(400)
+        .json({ success: false, message: 'Username already exists' });
     }
 
     if (password.length < 8) {
       // Password is too short, rollback and send response
       await pool.query('ROLLBACK');
-      return res.status(400).send('Password is too short');
+      return res
+        .status(400)
+        .json({ success: false, message: 'Password is too short' });
     }
 
     // Insert into users table
@@ -60,7 +64,9 @@ const loginUser = async (req, res) => {
     if (!usernameRow.rows.length) {
       // Username already exists, rollback and send response
       await pool.query('ROLLBACK');
-      return res.send('Username does not exist!');
+      return res
+        .status(404)
+        .json({ success: false, message: 'Username does not exist!' });
     }
 
     const userRow = await pool.query(queries.validateUser, [
@@ -70,7 +76,9 @@ const loginUser = async (req, res) => {
 
     if (!userRow.rows.length) {
       await pool.query('ROLLBACK');
-      return res.send('Incorrect password!');
+      return res
+        .status(401)
+        .json({ success: false, message: 'Incorrect password!' });
     }
 
     const userId = userRow.rows[0].user_id;
