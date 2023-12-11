@@ -60,6 +60,7 @@ const loginUser = async (req, res) => {
 
   try {
     await pool.query('BEGIN');
+
     const usernameRow = await pool.query(queries.validateUsername, [username]);
 
     if (!usernameRow.rows.length) {
@@ -104,6 +105,7 @@ const logoutUser = async (req, res) => {
 
   try {
     await pool.query('BEGIN');
+
     const validatedToken = await pool.query(queries.validateToken, [token]);
 
     if (!validatedToken.rows.length) {
@@ -127,6 +129,57 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const getPosts = async (req, res) => {
+  const { token } = req.headers;
+
+  try {
+    await pool.query('BEGIN');
+
+    const validatedToken = await pool.query(queries.validateToken, [token]);
+
+    if (!validatedToken.rows.length) {
+      await pool.query('ROLLBACK');
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid token.' });
+    }
+
+    const posts = await pool.query(queries.getPosts);
+
+    res.status(201).json(posts.rows[0]);
+  } catch (error) {
+    console.error('Error logging in:', error);
+    await pool.query('ROLLBACK');
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+const getUserPosts = async (req, res) => {
+  const { token } = req.headers;
+
+  try {
+    await pool.query('BEGIN');
+
+    const validatedToken = await pool.query(queries.validateToken, [token]);
+
+    if (!validatedToken.rows.length) {
+      await pool.query('ROLLBACK');
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid token.' });
+    }
+    const userId = validatedToken.rows[0].user_id;
+
+    const posts = await pool.query(queries.getUserPosts, [userId]);
+
+    res.status(201).json(posts.rows[0]);
+  } catch (error) {
+    console.error('Error logging in:', error);
+    await pool.query('ROLLBACK');
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 const getUsers = (req, res) => {
   pool.query(queries.getUsers, (error, results) => {
     if (error) throw error;
@@ -142,5 +195,7 @@ module.exports = {
   registerUser,
   loginUser,
   logoutUser,
+  getPosts,
+  getUserPosts,
   getUsers,
 };

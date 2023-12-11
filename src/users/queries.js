@@ -13,7 +13,9 @@ const getLoggedInUser =
   'SELECT u.id, u.first_name, u.last_name, ul.username, ul.token FROM users u INNER JOIN user_logins ul ON u.id = ul.user_id WHERE u.id = $1';
 const validateToken = 'SELECT * FROM user_logins WHERE user_logins.token = $1';
 const updateToken = 'UPDATE user_logins SET token = $1 WHERE user_id = $2';
-
+const getPosts = 'SELECT * FROM posts WHERE user_id = $1 ORDER BY created_at';
+const getUserPosts =
+  'SELECT * FROM posts WHERE user_id = $1 ORDER BY created_at';
 const getUsers = 'SELECT * FROM users';
 
 module.exports = {
@@ -26,5 +28,7 @@ module.exports = {
   getLoggedInUser,
   validateToken,
   updateToken,
+  getPosts,
+  getUserPosts,
   getUsers,
 };
