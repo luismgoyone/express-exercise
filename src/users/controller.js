@@ -59,6 +59,7 @@ const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
   try {
+    await pool.query('BEGIN');
     const usernameRow = await pool.query(queries.validateUsername, [username]);
 
     if (!usernameRow.rows.length) {
@@ -85,6 +86,8 @@ const loginUser = async (req, res) => {
     const authToken = await getAuthToken();
 
     await pool.query(queries.insertToken, [authToken, userId]);
+
+    await pool.query('COMMIT');
 
     const loggedInUser = await pool.query(queries.getLoggedInUser, [userId]);
 
