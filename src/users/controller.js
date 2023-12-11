@@ -115,9 +115,9 @@ const logoutUser = async (req, res) => {
 
     const userId = validatedToken.rows[0].user_id;
 
-    await pool.query('COMMIT');
-
     await pool.query(queries.updateToken, [null, userId]);
+
+    await pool.query('COMMIT');
 
     res.status(201).json({ success: true });
   } catch (error) {
