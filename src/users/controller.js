@@ -55,6 +55,38 @@ const addUser = async (req, res) => {
   }
 };
 
+const loginUser = async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const usernameRow = await pool.query(queries.validateUsername, [username]);
+
+    if (!usernameRow.rows.length) {
+      // Username already exists, rollback and send response
+      await pool.query('ROLLBACK');
+      return res.send('Username does not exist!');
+    }
+
+    const userRow = await pool.query(queries.validateUser, [
+      username,
+      password,
+    ]);
+
+    if (!userRow.rows.length) {
+      await pool.query('ROLLBACK');
+      return res.send('Incorrect password!');
+    }
+
+    const userId = userRow.rows[0].user_id;
+
+    const loggedInUser = await pool.query(queries.getLoggedInUser, [userId]);
+
+    res.status(201).json(loggedInUser.rows[0]);
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
 const getUsers = (req, res) => {
   pool.query(queries.getUsers, (error, results) => {
     if (error) throw error;
@@ -68,5 +100,6 @@ const getUsers = (req, res) => {
 
 module.exports = {
   addUser,
+  loginUser,
   getUsers,
 };
