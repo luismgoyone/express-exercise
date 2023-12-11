@@ -7,17 +7,24 @@ const getRegisteredUser =
   'SELECT users.id, users.first_name, users.last_name, user_logins.username FROM users INNER JOIN user_logins ON users.id = user_logins.user_id WHERE users.id = $1';
 const validateUser =
   'SELECT * FROM user_logins u WHERE u.username = $1 AND u.password = $2';
-const getUsers = 'SELECT * FROM users';
 const insertToken =
   'UPDATE user_logins SET token = $1, last_login_at = CURRENT_TIMESTAMP WHERE user_id = $2';
 const getLoggedInUser =
   'SELECT u.id, u.first_name, u.last_name, ul.username, ul.token FROM users u INNER JOIN user_logins ul ON u.id = ul.user_id WHERE u.id = $1';
+const validateToken = 'SELECT * FROM user_logins WHERE user_logins.token = $1';
+const updateToken = 'UPDATE user_logins SET token = $1 WHERE user_id = $2';
+
+const getUsers = 'SELECT * FROM users';
+
 module.exports = {
   validateUsername,
   insertUserToUsersTable,
   insertUserToUserLoginsTable,
   getRegisteredUser,
   validateUser,
-  getUsers,
+  insertToken,
   getLoggedInUser,
+  validateToken,
+  updateToken,
+  getUsers,
 };
