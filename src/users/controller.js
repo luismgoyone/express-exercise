@@ -74,6 +74,9 @@ const loginUser = async (req, res) => {
     }
 
     const userId = userRow.rows[0].user_id;
+    const authToken = await getAuthToken();
+
+    await pool.query(queries.insertToken, [authToken, userId]);
 
     const loggedInUser = await pool.query(queries.getLoggedInUser, [userId]);
 

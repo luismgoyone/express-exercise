@@ -8,6 +8,8 @@ const getRegisteredUser =
 const validateUser =
   'SELECT * FROM user_logins u WHERE u.username = $1 AND u.password = $2';
 const getUsers = 'SELECT * FROM users';
+const insertToken =
+  'UPDATE user_logins SET token = $1, last_login_at = CURRENT_TIMESTAMP WHERE user_id = $2';
 const getLoggedInUser =
   'SELECT u.id, u.first_name, u.last_name, ul.username, ul.token FROM users u INNER JOIN user_logins ul ON u.id = ul.user_id WHERE u.id = $1';
 module.exports = {
