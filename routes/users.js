@@ -66,18 +66,23 @@ router.post('/register',
 );
 
 router.post('/login', async (req, res) => {
-  // TODO: Wrap db operations in a try-catch block [?]
-
   const {
     username,
     password,
   } = req.body;
 
-  const [userLoginRecordByUsername] = await knex('user_logins')
-    .where({ username })
-    .select('username')
-    .from('user_logins')
-    .returning('*');
+  let userLoginRecordByUsername = null;
+
+  try {
+    [userLoginRecordByUsername] = await knex('user_logins')
+      .where({ username })
+      .select('username')
+      .from('user_logins')
+      .returning('*');
+  } catch (err) {
+    console.error(err);
+    return res.status(400).json({ errors: err });
+  }
 
   console.log({ userLoginRecordByUsername });
   
@@ -88,16 +93,23 @@ router.post('/login', async (req, res) => {
     return res.status(400).send({ error: `User ${username} not found` });
   }
 
-  const [userLoginMatchingRecord] = await knex('user_logins')
-    .where({
-      username,
-      password,
-    })
-    .select('username', 'user_id')
-    .from('user_logins')
-    .returning('*');
-  
-    console.log({ userLoginMatchingRecord });
+  let userLoginMatchingRecord = null;
+
+  try {
+    [userLoginMatchingRecord] = await knex('user_logins')
+      .where({
+        username,
+        password,
+      })
+      .select('username', 'user_id')
+      .from('user_logins')
+      .returning('*');
+  } catch(err) {
+    console.error(err);
+    return res.status(400).json({ errors: err });
+  }
+
+  console.log({ userLoginMatchingRecord });
 
   // if username and password combination is invalid, return an error
   if (
@@ -120,28 +132,42 @@ router.post('/login', async (req, res) => {
 
   console.log({ newLoginToken });
 
-  const [updatedUserLoginRecord] = await knex('user_logins')
-    .where({
-      username,
-      password,
-    })
-    .update({
-      token: newLoginToken,
-      last_login_at: knex.fn.now(),
-    }, ['username', 'token']);
+  let updatedUserLoginRecord = null;
+
+  try {
+    [updatedUserLoginRecord] = await knex('user_logins')
+      .where({
+        username,
+        password,
+      })
+      .update({
+        token: newLoginToken,
+        last_login_at: knex.fn.now(),
+      }, ['username', 'token']);
+  } catch(err) {
+    console.error(err);
+    return res.status(400).json({ errors: err });
+  }
 
   console.log({ updatedUserLoginRecord });
 
   // retrieve record from DB (USE JOIN)
-  const [userAndUserLoginRecord] = await knex('users')
-    .join('user_logins', 'users.id', '=', 'user_logins.user_id')
-    .select(
-      'users.id',
-      'users.first_name',
-      'users.last_name',
-      'user_logins.username',
-      'user_logins.token'
-    );
+  let userAndUserLoginRecord = null;
+
+  try {
+    [userAndUserLoginRecord] = await knex('users')
+      .join('user_logins', 'users.id', '=', 'user_logins.user_id')
+      .select(
+        'users.id',
+        'users.first_name',
+        'users.last_name',
+        'user_logins.username',
+        'user_logins.token'
+      );
+  } catch(err) {
+    console.error(err);
+    return res.status(400).json({ errors: err });
+  }
 
   console.log({ userAndUserLoginRecord });
   
