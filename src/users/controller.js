@@ -184,7 +184,7 @@ const getUserPosts = async (req, res) => {
   }
 };
 
-const addPost = async (req, res) => {
+const createPost = async (req, res) => {
   const { token } = req.headers;
   const { user_id, content } = req.body;
 
@@ -230,6 +230,6 @@ module.exports = {
   logoutUser,
   getPosts,
   getUserPosts,
-  addPost,
+  createPost,
   getUsers,
 };
