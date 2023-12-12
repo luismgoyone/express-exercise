@@ -37,7 +37,6 @@ router.post('/register',
     } = req.body;
 
     let returnedUser = null;
-
     try {
       [returnedUser] = await knex('users')
         .insert({
@@ -51,7 +50,6 @@ router.post('/register',
     }
 
     let returnedUserLogin = null;
-
     try {
       [returnedUserLogin] = await knex('user_logins')
         .insert({
@@ -86,7 +84,6 @@ router.post('/login', async (req, res) => {
   } = req.body;
 
   let userLoginRecordByUsername = null;
-
   try {
     [userLoginRecordByUsername] = await knex('user_logins')
       .where({ username })
@@ -108,7 +105,6 @@ router.post('/login', async (req, res) => {
   }
 
   let userLoginMatchingRecord = null;
-
   try {
     [userLoginMatchingRecord] = await knex('user_logins')
       .where({
@@ -147,7 +143,6 @@ router.post('/login', async (req, res) => {
   console.log({ newLoginToken });
 
   let updatedUserLoginRecord = null;
-
   try {
     [updatedUserLoginRecord] = await knex('user_logins')
       .where({
@@ -167,7 +162,6 @@ router.post('/login', async (req, res) => {
 
   // retrieve record from DB (USE JOIN)
   let userAndUserLoginRecord = null;
-
   try {
     [userAndUserLoginRecord] = await knex('users')
       .join('user_logins', 'users.id', '=', 'user_logins.user_id')
@@ -212,7 +206,6 @@ router.post('/logout', async (req, res) => {
   const { user_id } = decodedAuthData;
 
   let updatedUserLoginRecord = null;
-
   try {
     [updatedUserLoginRecord] = await knex('user_logins')
       .where({ user_id })

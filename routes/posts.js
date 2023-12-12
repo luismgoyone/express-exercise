@@ -25,7 +25,6 @@ router.get('/all', verifyAuthorizationHeader, async (req, res) => {
   // Retrieval of all posts
 
   let posts = [];
-
   try {
     posts = await knex
       .select(
@@ -173,7 +172,6 @@ router.put('/update',
     // Query existing post beforehand
 
     let existingPost = null;
-
     try {
       existingPost = await knex('posts')
         .where('id', id)
@@ -198,7 +196,6 @@ router.put('/update',
     }
 
     let updatedPost = null;
-
     try {
       [updatedPost] = await knex('posts')
         .where({ id })
@@ -234,7 +231,6 @@ router.delete('/delete',
     // Query existing post beforehand
 
     let existingPost = null;
-
     try {
       existingPost = await knex('posts')
         .where('id', id)
