@@ -197,12 +197,19 @@ router.post('/logout', async (req, res) => {
 
   const { user_id } = decodedAuthData;
 
-  const [updatedUserLoginRecord] = await knex('user_logins')
-    .where({ user_id })
-    .update(
-      { token: null },
-      ['user_id', 'username']
-    );
+  let updatedUserLoginRecord = null;
+
+  try {
+    [updatedUserLoginRecord] = await knex('user_logins')
+      .where({ user_id })
+      .update(
+        { token: null },
+        ['user_id', 'username']
+      );
+  } catch(err) {
+    console.error(err);
+    return res.status(400).json({ errors: err });
+  }
 
   if (!updatedUserLoginRecord) {
     return res.status(401).json({ message: 'Logout failed' });
