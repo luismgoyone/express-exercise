@@ -178,6 +178,36 @@ const getUserPosts = async (req, res) => {
     res.status(201).json(userPosts.rows[0]);
   } catch (error) {
     console.error('Error logging in:', error);
+
+    await pool.query('ROLLBACK');
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+const addPost = async (req, res) => {
+  const { token } = req.headers;
+  const { user_id, content } = req.body;
+
+  try {
+    await pool.query('BEGIN');
+
+    const validatedToken = await pool.query(queries.validateToken, [token]);
+
+    if (!validatedToken.rows.length) {
+      await pool.query('ROLLBACK');
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid token.' });
+    }
+
+    const post = await pool.query(queries.addPost, [user_id, content]);
+
+    await pool.query('COMMIT');
+
+    res.status(201).json(post.rows[0]);
+  } catch (error) {
+    console.error('Error logging in:', error);
+
     await pool.query('ROLLBACK');
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
@@ -200,5 +230,6 @@ module.exports = {
   logoutUser,
   getPosts,
   getUserPosts,
+  addPost,
   getUsers,
 };

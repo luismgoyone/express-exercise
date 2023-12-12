@@ -16,6 +16,8 @@ const updateToken = 'UPDATE user_logins SET token = $1 WHERE user_id = $2';
 const getPosts = 'SELECT * FROM posts ORDER BY created_at';
 const getUserPosts =
   'SELECT * FROM posts WHERE user_id = $1 ORDER BY created_at';
+const addPost =
+  'INSERT INTO posts (user_id, content, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING id, content';
 const getUsers = 'SELECT * FROM users';
 
 module.exports = {
@@ -30,5 +32,6 @@ module.exports = {
   updateToken,
   getPosts,
   getUserPosts,
+  addPost,
   getUsers,
 };

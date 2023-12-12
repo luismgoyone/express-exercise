@@ -9,5 +9,6 @@ router.post('/login', controller.loginUser);
 router.post('/logout', controller.logoutUser);
 router.get('/posts', controller.getPosts);
 router.get('/posts', controller.getUserPosts);
+router.post('/add-post', controller.addPost);
 
 module.exports = router;
