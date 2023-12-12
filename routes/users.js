@@ -177,7 +177,8 @@ router.post('/login', async (req, res) => {
         'users.last_name',
         'user_logins.username',
         'user_logins.token'
-      );
+      )
+      .where({ id: userLoginMatchingRecord.user_id });
   } catch(err) {
     console.error(err);
     return res.status(400).json({ errors: err });
