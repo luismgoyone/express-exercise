@@ -12,7 +12,7 @@ const parseTokenFromAuthHeader = (authorizationHeader) => {
 
 const verifyAuthToken = (authorizationHeader) => {
   if (!authorizationHeader) {
-    console.error('no authorization header provided');
+    console.error('No `Authorization` header provided');
     return {
       isValid: false,
       decodedAuthData: null,
@@ -42,7 +42,7 @@ const verifyAuthorizationHeader = async (req, res, next) => { // middleware
   const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
 
   if (!authorizationHeader) {
-    return res.status(401).json({ message: 'No `authorization` header provided' });
+    return res.status(401).json({ message: 'No `Authorization` header provided' });
   }
 
   const {

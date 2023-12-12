@@ -156,7 +156,7 @@ router.post('/logout', async (req, res) => {
   const authorizationHeader = req.headers['Authorization'] || req.headers['authorization'];
 
   if (!authorizationHeader) {
-    return res.status(401).json({ message: 'No `authorization` header provided' });
+    return res.status(401).json({ message: 'No `Authorization` header provided' });
   }
 
   const {
