@@ -36,20 +36,34 @@ router.post('/register',
       password,
     } = req.body;
 
-    const [returnedUser] = await knex('users')
-      .insert({
-        first_name: first_name.trim(),
-        last_name: last_name.trim(),
-      })
-      .returning('*');
+    let returnedUser = null;
 
-    const [returnedUserLogin] = await knex('user_logins')
-      .insert({
-        user_id: returnedUser.id,
-        username: username.trim(),
-        password: password,
-      })
-      .returning('*');
+    try {
+      [returnedUser] = await knex('users')
+        .insert({
+          first_name: first_name.trim(),
+          last_name: last_name.trim(),
+        })
+        .returning('*');
+    } catch(err) {
+      console.error(err);
+      return res.status(400).json({ errors: err });
+    }
+
+    let returnedUserLogin = null;
+
+    try {
+      [returnedUserLogin] = await knex('user_logins')
+        .insert({
+          user_id: returnedUser.id,
+          username: username.trim(),
+          password: password,
+        })
+        .returning('*');
+    } catch(err) {
+      console.error(err);
+      return res.status(400).json({ errors: err });
+    }
 
     console.log(JSON.stringify({
       returnedUser,
