@@ -23,46 +23,47 @@ router.post('/register',
       .withMessage(`String ${field} should have a length of 1 up to 20 characters`);
   }),
   async (req, res) => {
-  const errors = validationResult(req);
+    const errors = validationResult(req);
 
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors });
+    }
+
+    const {
+      first_name,
+      last_name,
+      username,
+      password,
+    } = req.body;
+
+    const [returnedUser] = await knex('users')
+      .insert({
+        first_name: first_name.trim(),
+        last_name: last_name.trim(),
+      })
+      .returning('*');
+
+    const [returnedUserLogin] = await knex('user_logins')
+      .insert({
+        user_id: returnedUser.id,
+        username: username.trim(),
+        password: password,
+      })
+      .returning('*');
+
+    console.log(JSON.stringify({
+      returnedUser,
+      returnedUserLogin,
+    }, null, 2));
+
+    res.json({
+      id: returnedUser.id,
+      first_name: returnedUser.first_name,
+      last_name: returnedUser.last_name,
+      username: returnedUserLogin.username,
+    });
   }
-
-  const {
-    first_name,
-    last_name,
-    username,
-    password,
-  } = req.body;
-
-  const [returnedUser] = await knex('users')
-    .insert({
-      first_name: first_name.trim(),
-      last_name: last_name.trim(),
-    })
-    .returning('*');
-
-  const [returnedUserLogin] = await knex('user_logins')
-    .insert({
-      user_id: returnedUser.id,
-      username: username.trim(),
-      password: password,
-    })
-    .returning('*');
-
-  console.log(JSON.stringify({
-    returnedUser,
-    returnedUserLogin,
-  }, null, 2));
-
-  res.json({
-    id: returnedUser.id,
-    first_name: returnedUser.first_name,
-    last_name: returnedUser.last_name,
-    username: returnedUserLogin.username,
-  });
-});
+);
 
 router.post('/login', async (req, res) => {
   // TODO: Wrap db operations in a try-catch block [?]
