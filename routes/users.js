@@ -10,7 +10,11 @@ require('dotenv').config();
 const { AUTH_SECRET } = process.env;
 
 router.post('/register',
-  ['first_name','last_name', 'username', 'password'].map(field => {
+  [ 'first_name',
+    'last_name',
+    'username',
+    'password'
+  ].map(field => {
     return body(field)
       .exists()
       .withMessage(`${field} is required`)
