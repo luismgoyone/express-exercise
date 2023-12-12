@@ -95,6 +95,7 @@ const loginUser = async (req, res) => {
     res.status(201).json(loggedInUser.rows[0]);
   } catch (error) {
     console.error('Error logging in:', error);
+
     await pool.query('ROLLBACK');
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
@@ -124,6 +125,7 @@ const logoutUser = async (req, res) => {
     res.status(201).json({ success: true });
   } catch (error) {
     console.error('Error logging in:', error);
+
     await pool.query('ROLLBACK');
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
@@ -149,6 +151,7 @@ const getPosts = async (req, res) => {
     res.status(201).json(posts.rows[0]);
   } catch (error) {
     console.error('Error logging in:', error);
+
     await pool.query('ROLLBACK');
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
