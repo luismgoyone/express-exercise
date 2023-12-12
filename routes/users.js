@@ -9,24 +9,20 @@ const { verifyAuthToken } = require('../utils/verifyAuth');
 require('dotenv').config();
 const { AUTH_SECRET } = process.env;
 
-function validateStringUserParam(field) {
-  return body(field)
-    .exists()
-    .withMessage(`${field} is required`)
-    .isString()
-    .withMessage(`${field} must be a string`)
-    .isLength({
-      min: (field === 'password' ? 8 : 1),
-      max: 20,
-    })
-    .withMessage(`String ${field} should have a length of 1 up to 20 characters`);
-}
-
-const validationsRegisterEndpoint = ['first_name', 'last_name', 'username', 'password'].map(field => {
-  return validateStringUserParam(field);
-});
-
-router.post('/register', validationsRegisterEndpoint, async (req, res) => {
+router.post('/register',
+  ['first_name','last_name', 'username', 'password'].map(field => {
+    return body(field)
+      .exists()
+      .withMessage(`${field} is required`)
+      .isString()
+      .withMessage(`${field} must be a string`)
+      .isLength({
+        min: (field === 'password' ? 8 : 1),
+        max: 20,
+      })
+      .withMessage(`String ${field} should have a length of 1 up to 20 characters`);
+  }),
+  async (req, res) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
