@@ -213,6 +213,37 @@ const createPost = async (req, res) => {
   }
 };
 
+const updatePost = async (req, res) => {
+  const { token } = req.headers;
+  const { id, content } = req.body;
+
+  try {
+    await pool.query('BEGIN');
+
+    const validatedToken = await pool.query(queries.validateToken, [token]);
+
+    if (!validatedToken.rows.length) {
+      await pool.query('ROLLBACK');
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid token.' });
+    }
+
+    // const userId = validatedToken.rows[0].user_id;
+
+    const post = await pool.query(queries.updatePost, [content, id]);
+
+    await pool.query('COMMIT');
+
+    res.status(201).json(post.rows[0]);
+  } catch (error) {
+    console.error('Error logging in:', error);
+
+    await pool.query('ROLLBACK');
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 const getUsers = (req, res) => {
   pool.query(queries.getUsers, (error, results) => {
     if (error) throw error;
@@ -231,5 +262,6 @@ module.exports = {
   getPosts,
   getUserPosts,
   createPost,
+  updatePost,
   getUsers,
 };

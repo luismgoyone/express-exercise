@@ -18,6 +18,8 @@ const getUserPosts =
   'SELECT * FROM posts WHERE user_id = $1 ORDER BY created_at';
 const addPost =
   'INSERT INTO posts (user_id, content, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING id, content';
+const updatePost =
+  'UPDATE posts SET content = $1 WHERE id = $2 RETURNING id, content';
 const getUsers = 'SELECT * FROM users';
 
 module.exports = {
@@ -33,5 +35,6 @@ module.exports = {
   getPosts,
   getUserPosts,
   addPost,
+  updatePost,
   getUsers,
 };
