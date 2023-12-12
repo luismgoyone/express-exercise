@@ -7,11 +7,10 @@ const registerUser = async (req, res) => {
 
   try {
     await pool.query('BEGIN');
-    // Validate username case-insensitively
+
     const usernameRow = await pool.query(queries.validateUsername, [username]);
 
     if (usernameRow.rows.length) {
-      // Username already exists, rollback and send response
       await pool.query('ROLLBACK');
       return res
         .status(400)
@@ -19,14 +18,12 @@ const registerUser = async (req, res) => {
     }
 
     if (password.length < 8) {
-      // Password is too short, rollback and send response
       await pool.query('ROLLBACK');
       return res
         .status(400)
         .json({ success: false, message: 'Password is too short' });
     }
 
-    // Insert into users table
     const userResult = await pool.query(queries.insertUserToUsersTable, [
       first_name,
       last_name,
@@ -34,22 +31,20 @@ const registerUser = async (req, res) => {
 
     const userId = userResult.rows[0].id;
 
-    // Insert into user_logins table
     await pool.query(queries.insertUserToUserLoginsTable, [
       userId,
       username,
       password,
     ]);
-    // Commit the transaction
+
     await pool.query('COMMIT');
 
-    // Fetch registered user information
     const result = await pool.query(queries.getRegisteredUser, [userId]);
-    // Send the registered user information in the response
+
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Error adding user:', error);
-    // Rollback on error
+
     await pool.query('ROLLBACK');
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
@@ -64,7 +59,6 @@ const loginUser = async (req, res) => {
     const usernameRow = await pool.query(queries.validateUsername, [username]);
 
     if (!usernameRow.rows.length) {
-      // Username already exists, rollback and send response
       await pool.query('ROLLBACK');
       return res
         .status(404)
@@ -229,8 +223,6 @@ const updatePost = async (req, res) => {
         .json({ success: false, message: 'Invalid token.' });
     }
 
-    // const userId = validatedToken.rows[0].user_id;
-
     const post = await pool.query(queries.updatePost, [content, id]);
 
     await pool.query('COMMIT');
@@ -250,10 +242,6 @@ const getUsers = (req, res) => {
     res.status(200).json(results.rows);
   });
 };
-
-// const regiserUser = (req, res) => {
-//   pool.post()
-// }
 
 module.exports = {
   registerUser,
