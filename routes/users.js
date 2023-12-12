@@ -3,7 +3,9 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
-const knex = require('../db/dbClient');
+const Connector = require('../db/dbClient');
+const knex = Connector.getInstance();
+
 const { verifyAuthToken } = require('../utils/verifyAuth');
 
 require('dotenv').config();

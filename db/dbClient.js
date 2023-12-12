@@ -3,6 +3,10 @@ require('dotenv').config();
 const knexConfig = require('../knexfile');
 const ENV = process.env.ENV || 'dev';
 
-const knex = require('knex')(knexConfig[ENV]);
+class Connector {
+  static getInstance() {
+    return require('knex')(knexConfig[ENV]);
+  }
+}
 
-module.exports = knex;
+module.exports = Connector;

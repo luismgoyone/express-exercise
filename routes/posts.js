@@ -3,7 +3,8 @@ const router = express.Router();
 const { body, param, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
-const knex = require('../db/dbClient');
+const Connector = require('../db/dbClient');
+const knex = Connector.getInstance();
 
 // imports for middleware
 const { verifyAuthorizationHeader } = require('../utils/verifyAuth');
