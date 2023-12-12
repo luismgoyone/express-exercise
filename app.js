@@ -9,8 +9,6 @@ app.use(express.urlencoded({ extended: true }));
 // Parse application/json
 app.use(express.json());
 
-const knex = require('./db/dbClient');
-
 // Middleware
 // ...
 
