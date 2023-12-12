@@ -9,4 +9,6 @@ class Connector {
   }
 }
 
+// TODO: Determine in which parts of the code to call knex.destroy();
+
 module.exports = Connector;
