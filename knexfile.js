@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const knexConfig = {
   dev: {
     client: 'pg',
