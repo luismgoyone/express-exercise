@@ -127,6 +127,8 @@ router.post('/login', async (req, res) => {
 
   console.log({ userLoginMatchingRecord });
 
+  // NOTE: (Alternate implementation) Can also just query once instead of twice. Select the username and password, and then verify the password.
+
   // if username and password combination is invalid, return an error
   if (
     userLoginRecordByUsername &&
