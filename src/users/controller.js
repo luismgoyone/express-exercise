@@ -238,7 +238,7 @@ const updatePost = async (req, res) => {
 
 const deletePost = async (req, res) => {
   const { token } = req.headers;
-  const { id } = req.body;
+  const { id } = req.params;
 
   try {
     await pool.query('BEGIN');
