@@ -20,6 +20,7 @@ const addPost =
   'INSERT INTO posts (user_id, content, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING id, content';
 const updatePost =
   'UPDATE posts SET content = $1 WHERE id = $2 RETURNING id, content';
+const deletePost = 'DELETE FROM posts WHERE id = $1 RETURNING id, content';
 const getUsers = 'SELECT * FROM users';
 
 module.exports = {
@@ -36,5 +37,6 @@ module.exports = {
   getUserPosts,
   addPost,
   updatePost,
+  deletePost,
   getUsers,
 };
