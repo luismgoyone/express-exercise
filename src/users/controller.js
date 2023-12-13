@@ -142,7 +142,7 @@ const getPosts = async (req, res) => {
 
     const posts = await pool.query(queries.getPosts);
 
-    res.status(201).json(posts.rows[0]);
+    res.status(201).json({ data: posts.rows });
   } catch (error) {
     console.error('Error logging in:', error);
 
@@ -169,7 +169,7 @@ const getUserPosts = async (req, res) => {
 
     const userPosts = await pool.query(queries.getUserPosts, [user_id]);
 
-    res.status(201).json(userPosts.rows[0]);
+    res.status(201).json({ data: userPosts.rows });
   } catch (error) {
     console.error('Error logging in:', error);
 
