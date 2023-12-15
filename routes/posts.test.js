@@ -17,6 +17,13 @@ const mockToken = jwt.sign(
   AUTH_SECRET
 );
 
+/*
+  TODO: Fix this issue (usually encountered after doing `npm run test` where the Jest script doesn't exit after all tests have been executed):
+  Jest did not exit one second after the test run has completed.
+
+  'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
+*/
+
 describe('GET /posts/all', () => {
   test('given a valid token', async () => {
     const response = await request(app)
