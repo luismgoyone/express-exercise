@@ -7,13 +7,14 @@ const request = require('supertest');
 const app = require('../app');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const { AUTH_SECRET } = process.env;
 
 const mockToken = jwt.sign(
   {
     username: 'mockusername',
     user_id: '0',
   },
-  process.env.AUTH_SECRET
+  AUTH_SECRET
 );
 
 describe('GET /posts/all', () => {
@@ -47,7 +48,7 @@ describe('GET /posts/all', () => {
         username: 'mockusername',
         // user_id: '0', // no encoded user_id
       },
-      process.env.AUTH_SECRET
+      AUTH_SECRET
     );
 
     const response = await request(app)
