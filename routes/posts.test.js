@@ -40,6 +40,7 @@ describe('GET /posts/all', () => {
       .set('Authorization', `Bearer ${invalidToken}`);
 
     expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe('Invalid token');
   });
 
   test('given a token with incomplete encoded fields (e.g. no user_id)', async () => {
