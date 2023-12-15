@@ -24,6 +24,7 @@ describe('GET /posts/all', () => {
       .set('Authorization', `Bearer ${mockToken}`);
 
     expect(response.statusCode).toBe(200);
+    expect(response.body.length).toBeDefined(); // expects an array
   });
 
   test('given an invalid token', async () => {
