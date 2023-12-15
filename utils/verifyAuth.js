@@ -55,6 +55,19 @@ const verifyAuthorizationHeader = async (req, res, next) => { // middleware
   }
 
   if (!decodedAuthData) {
+    return res.status(401).json({ message: 'No decoded auth data' });
+  }
+
+  const AUTH_TOKEN_REQUIRED_ENCODED_FIELDS = ['username', 'user_id'];
+
+  const hasValidData = AUTH_TOKEN_REQUIRED_ENCODED_FIELDS.reduce(
+    (finalValue, field) => {
+      return (finalValue && decodedAuthData.hasOwnProperty(field));
+    },
+    true
+  );
+
+  if (!hasValidData) {
     return res.status(401).json({ message: 'Invalid decoded auth data' });
   }
 
