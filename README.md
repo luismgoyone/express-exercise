@@ -1,3 +1,16 @@
+
+## Changelog
+
+
+### Plan
+0. Vitest + Playwright (API Testing)
+1. Express (Node)
+2. Fastify (Node)
+3. Go
+4. SAM (Go)
+
+---
+
 ### BE Exercise (Node.js & PostgreSQL)
 
 # Overview
