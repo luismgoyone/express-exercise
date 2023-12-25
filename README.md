@@ -1,13 +1,22 @@
-
 ## Changelog
 
+## Plan
+- [ ]. Vitest + Playwright (API Testing)
+- [ ]. Express (Node)
+- [ ]. Fastify (Node)
+- [ ]. Go
+- [ ]. SAM (Go)
 
-### Plan
-0. Vitest + Playwright (API Testing)
-1. Express (Node)
-2. Fastify (Node)
-3. Go
-4. SAM (Go)
+## References
+1. [Pern Stack Course](https://www.youtube.com/watch?v=ldYcgPKEZC8)
+
+### Postgres Setup
+Creating new postgres user:
+```bash
+CREATE ROLE pgadmin WITH LOGIN PASSWORD 'pg4dm1n!';
+ALTER ROLE pgadmin CREATEDB;
+```
+
 
 ---
 
