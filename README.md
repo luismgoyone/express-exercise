@@ -1,14 +1,15 @@
 ## Changelog
 
 ## Plan
-- [ ]. Vitest + Playwright (API Testing)
-- [ ]. Express (Node)
-- [ ]. Fastify (Node)
-- [ ]. Go
-- [ ]. SAM (Go)
+- [ ] Vitest + Playwright (API Testing)
+- [ ] Express (Node)
+- [ ] Fastify (Node)
+- [ ] Go
+- [ ] SAM (Go)
 
 ## References
 1. [Pern Stack Course](https://www.youtube.com/watch?v=ldYcgPKEZC8)
+2. [HTTP Response Code for Resource Already Exists](https://stackoverflow.com/questions/3825990/http-response-code-for-post-when-resource-already-exists)
 
 ### Postgres Setup
 Creating new postgres user:

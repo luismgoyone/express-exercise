@@ -31,11 +31,11 @@ const init = async (): Promise<boolean> => {
         END $$;
       `);
 
-      console.info('[db]: Expected database does not exist. A new one is created.');
+      // console.info('[db]: Expected database does not exist. A new one is created.');
     //  return;
     // }
 
-    console.info('[db]: Database detected.');
+    // console.info('[db]: Database detected.');
 
     await initializeTables();
 
