@@ -1,6 +1,22 @@
 import express from 'express';
 import * as db from './db';
 
+const nonExistentUser = {
+  id: 666,
+  first_name: 'sukuna',
+  last_name: 'ryomen',
+  username: 'malevolent',
+  password: 'shrine666'
+}
+
+const existingUser = {
+  id: 1,
+  first_name: 'gojo',
+  last_name: 'satoru',
+  username: 'limitless',
+  password: 'sixeyes',
+}
+
 const app = express();
 const port = process.env.PORT;
 
@@ -17,23 +33,6 @@ app.get('/api', (_, res) => {
 });
 
 app.post('/api/users', (req, res) => {
-  
-  const nonExistentUser = {
-    id: 666,
-    first_name: 'sukuna',
-    last_name: 'ryomen',
-    username: 'malevolent',
-    password: 'shrine666'
-  }
-
-  const existingUser = {
-    id: 1,
-    first_name: 'gojo',
-    last_name: 'satoru',
-    username: 'limitless',
-    password: 'sixeyes',
-  }
-
   const { id, ...userDetails } = existingUser
 
   const isUserExisting = JSON.stringify(req.body) === JSON.stringify(userDetails)
@@ -49,7 +48,7 @@ app.post('/api/users', (req, res) => {
   if (isPasswordLessThan8Characters) {
     res.status(400).json({
       success: false,
-      error: 'Password should be 8 characters or above!'
+      error: 'Password should be 8 characters or above!',
     })    
     return;
   }
@@ -57,6 +56,29 @@ app.post('/api/users', (req, res) => {
   res.status(201).json({
     success: true,
     data: nonExistentUser,
+  })
+})
+
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const nonExistentUsername = 'panda'
+  const isUserExisting = username !== nonExistentUsername
+  
+  const isUserMatching = username === existingUser.username && password === existingUser.password  
+
+  if (!isUserExisting || !isUserMatching) {
+    res.status(404).json({
+      success: false,
+      error: 'Username and password does not match!',
+    }) 
+    return;
+  }
+  
+  const { password: excluded, ...userDetails } = existingUser;
+  res.status(200).json({
+    success: true,
+    data: userDetails,
   })
 })
 
