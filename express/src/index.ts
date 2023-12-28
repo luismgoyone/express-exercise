@@ -32,6 +32,8 @@ app.get('/api', (_, res) => {
   res.send('Server up.');
 });
 
+
+// NOTE: Users
 app.post('/api/users', (req, res) => {
   const { id, ...userDetails } = existingUser
 
@@ -59,6 +61,7 @@ app.post('/api/users', (req, res) => {
   })
 })
 
+// NOTE: Auth
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -96,6 +99,55 @@ app.post('/api/auth/logout', (req, res) => {
   }
 
   res.sendStatus(205)
+})
+
+// Posts
+app.get('/api/posts', (req, res) => {
+  const { headers: { token } } = req
+
+  const isTokenExisting = !!token
+  if (!isTokenExisting) {
+    res.status(401).json({
+      success: false,
+    })
+  }
+
+  const data = []
+  const date = new Date()
+  date.setHours(date.getHours() + 5)
+  data.push({
+    id: 1,
+    content: "i don't know how i'll feel when i'm dead, but i don't want to regret the way i lived.",
+    first_name: 'yuji',
+    last_name: 'itadori',
+    username: 'enchain',
+    created_at: date.toISOString(),
+  })
+  date.setHours(date.getHours() - 40)
+  data.push({
+    id: 2,
+    content: "what makes us obligated to meet such perfection or such absurd standards?",
+    first_name: 'nobara',
+    last_name: 'kugisaki',
+    username: 'hairpin',
+    created_at: date.toISOString(),
+  })
+  date.setHours(date.getHours() + 20)
+  data.push({
+    id: 3,
+    content: "i want more good people to enjoy fairness, even if only a few.",
+    first_name: 'megumi',
+    last_name: 'fushiguro',
+    username: 'tenshadows',
+    created_at: date.toISOString(),
+  },)
+
+  data.sort((a, b) => (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
+
+  res.status(200).json({
+    success: true,
+    data,
+  })
 })
 
 const server = app.listen(port, async () => {

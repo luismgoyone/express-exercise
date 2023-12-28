@@ -1,4 +1,22 @@
-## Changelog
+## Feedback
+
+1. [HTTP Response Code for Resource Already Exists](https://stackoverflow.com/questions/3825990/http-response-code-for-post-when-resource-already-exists) - it's funny how the response codes are not really very strictly followed, or maybe it's really a living standard that you will see the cracks in its surface hehe.
+
+2. Is there some package that does something like when we used `graphql-tag`?: 
+```ts
+  psql`CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        first_name VARCHAR(20),
+        last_name VARCHAR(20)
+      );`
+```
+
+3. When I started this, I realize, i need the MVC paradigm. Even if I'm not 100% wanting to use rails, I appreciated the workflow of creating models, and just cli-ing to create migrations. I am returning to my working knowledge of MERN, by returning, going back to learning it, I haven't used it in production! Is there a good MVC framework for express? My code is about to be spaghetti. 
+
+4. Being a tech lead is hard. It might not be for every one. Hell, I feel it's not really for me. Because I missed this intensity of just thinking about code, and as I continue this exercise, it feels like I got back home. I mean, you will always realize that to be able to think better as a lead, you need to actually implement all the little details. This is yet again a humbling experience for me because even if I know I don't know everything, I am forgetting some things! So my stand now, to be a tech lead should be not to eliminate coding but to always be vigilant in terms of opportunities to delegate. Like a true king that starts riding at the front of his army towards the enemy.
+
+5. 
+
 
 ## Plan
 - [ ] Vitest + Playwright (API Testing)
