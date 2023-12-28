@@ -102,8 +102,8 @@ app.post('/api/auth/logout', (req, res) => {
 })
 
 // Posts
-app.get('/api/posts', (req, res) => {
-  const { headers: { token } } = req
+app.get('/api/posts/:user_id?', (req, res) => {
+  const { headers: { token }, params: { user_id } } = req
 
   const isTokenExisting = !!token
   if (!isTokenExisting) {
@@ -112,7 +112,7 @@ app.get('/api/posts', (req, res) => {
     })
   }
 
-  const data = []
+  let data = []
   const date = new Date()
   date.setHours(date.getHours() + 5)
   data.push({
@@ -141,8 +141,34 @@ app.get('/api/posts', (req, res) => {
     username: 'tenshadows',
     created_at: date.toISOString(),
   },)
+  data.push({
+    id: 4,
+    content: "it's not about whether i can. i have to do it.",
+    first_name: 'megumi',
+    last_name: 'fushiguro',
+    username: 'tenshadows',
+    created_at: date.toISOString(),
+  })
+
+  const users: Record<string, number> = {
+    'tenshadows': 1,
+    'hairpin': 2,
+    'enchain': 3
+  }
 
   data.sort((a, b) => (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
+
+  if (user_id) {
+    const filteredData = data
+      .filter((post) => Number(user_id) === users[post.username])
+      .map(post => ({ id: post.id, content: post.content  }))
+
+    res.status(200).json({
+      success: true,
+      data: filteredData,
+    })
+    return;
+  }
 
   res.status(200).json({
     success: true,
