@@ -59,7 +59,7 @@ app.post('/api/users', (req, res) => {
   })
 })
 
-app.post('/api/login', (req, res) => {
+app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
 
   const nonExistentUsername = 'panda'
@@ -78,8 +78,24 @@ app.post('/api/login', (req, res) => {
   const { password: excluded, ...userDetails } = existingUser;
   res.status(200).json({
     success: true,
-    data: userDetails,
+    data: {
+      ...userDetails,
+      token: 'domainexpansion',
+    },
   })
+})
+
+app.post('/api/auth/logout', (req, res) => {
+  const { headers: { token }, body: { username } } = req
+
+  const isTokenExisting = !!token
+  const isUsernameExisting = !!username
+  if (!isTokenExisting || !isUsernameExisting) {
+    res.sendStatus(400)
+    return;
+  }
+
+  res.sendStatus(205)
 })
 
 const server = app.listen(port, async () => {

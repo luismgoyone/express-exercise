@@ -10,6 +10,8 @@
 ## References
 1. [Pern Stack Course](https://www.youtube.com/watch?v=ldYcgPKEZC8)
 2. [HTTP Response Code for Resource Already Exists](https://stackoverflow.com/questions/3825990/http-response-code-for-post-when-resource-already-exists)
+3. [REST method for Logout - POST](https://stackoverflow.com/a/14587231/8547125)
+4. [HTTP Response Code for Logout - 205](https://stackoverflow.com/a/36220291/8547125)
 
 ### Postgres Setup
 Creating new postgres user:
