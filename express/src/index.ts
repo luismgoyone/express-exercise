@@ -33,15 +33,15 @@ app.get('/api', (_, res) => {
 });
 
 
-// NOTE: Users
-app.post('/api/users', (req, res) => {
+// NOTE: Auth
+app.post('/api/auth/register', (req, res) => {
   const { id, ...userDetails } = existingUser
 
   const isUserExisting = JSON.stringify(req.body) === JSON.stringify(userDetails)
   if (isUserExisting) {
     res.status(409).json({
       success: false,
-      error: 'User already exists!'
+      message: 'User already exists!'
     })    
     return;
   }
@@ -50,7 +50,7 @@ app.post('/api/users', (req, res) => {
   if (isPasswordLessThan8Characters) {
     res.status(400).json({
       success: false,
-      error: 'Password should be 8 characters or above!',
+      message: 'Password should be 8 characters or above!',
     })    
     return;
   }
@@ -61,7 +61,6 @@ app.post('/api/users', (req, res) => {
   })
 })
 
-// NOTE: Auth
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -73,7 +72,7 @@ app.post('/api/auth/login', (req, res) => {
   if (!isUserExisting || !isUserMatching) {
     res.status(404).json({
       success: false,
-      error: 'Username and password does not match!',
+      message: 'Username and password does not match!',
     }) 
     return;
   }
@@ -109,14 +108,18 @@ app.get('/api/posts/:user_id?', (req, res) => {
   if (!isTokenExisting) {
     res.status(401).json({
       success: false,
+      error: {
+        message: 'Unauthorized post access!',
+      }
     })
+    return;
   }
 
   let data = []
   const date = new Date()
   date.setHours(date.getHours() + 5)
   data.push({
-    id: 1,
+    id: 2,
     content: "i don't know how i'll feel when i'm dead, but i don't want to regret the way i lived.",
     first_name: 'yuji',
     last_name: 'itadori',
@@ -125,7 +128,7 @@ app.get('/api/posts/:user_id?', (req, res) => {
   })
   date.setHours(date.getHours() - 40)
   data.push({
-    id: 2,
+    id: 3,
     content: "what makes us obligated to meet such perfection or such absurd standards?",
     first_name: 'nobara',
     last_name: 'kugisaki',
@@ -134,7 +137,7 @@ app.get('/api/posts/:user_id?', (req, res) => {
   })
   date.setHours(date.getHours() + 20)
   data.push({
-    id: 3,
+    id: 4,
     content: "i want more good people to enjoy fairness, even if only a few.",
     first_name: 'megumi',
     last_name: 'fushiguro',
@@ -158,21 +161,51 @@ app.get('/api/posts/:user_id?', (req, res) => {
 
   data.sort((a, b) => (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
 
-  if (user_id) {
-    const filteredData = data
-      .filter((post) => Number(user_id) === users[post.username])
-      .map(post => ({ id: post.id, content: post.content  }))
-
+  if (!user_id) {
     res.status(200).json({
       success: true,
-      data: filteredData,
+      data,
     })
     return;
   }
 
+  const filteredData = data
+    .filter((post) => Number(user_id) === users[post.username])
+    .map(post => ({ id: post.id, content: post.content  }))
+
   res.status(200).json({
     success: true,
-    data,
+    data: filteredData,
+  })
+})
+
+app.post('/api/posts/:user_id', (req, res) => {
+  const { body: { content }, params: { user_id }, headers: { token } } = req
+
+  const isTokenExisting = !!token
+  if (!isTokenExisting) {
+    res.status(401).json({
+      success: false,
+      message: 'Unauthorized post creation!',
+    })
+    return;
+  }
+
+  const isMalformedRequestBody = !content
+  if (isMalformedRequestBody) {
+    res.status(400).json({
+      success: false,
+      message: 'Malformed request!',
+    })
+    return;
+  }
+
+  res.status(201).json({
+    success: true,
+    data: {
+      id: Math.floor(Math.random()),
+      content,
+    }
   })
 })
 

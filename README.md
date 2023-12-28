@@ -15,7 +15,23 @@
 
 4. Being a tech lead is hard. It might not be for every one. Hell, I feel it's not really for me. Because I missed this intensity of just thinking about code, and as I continue this exercise, it feels like I got back home. I mean, you will always realize that to be able to think better as a lead, you need to actually implement all the little details. This is yet again a humbling experience for me because even if I know I don't know everything, I am forgetting some things! So my stand now, to be a tech lead should be not to eliminate coding but to always be vigilant in terms of opportunities to delegate. Like a true king that starts riding at the front of his army towards the enemy.
 
-5. 
+5. I think we should standardize anything about api - the contract of BE and FE early on. And utilize response codes instead of returning boolean success. 
+
+### For API Standardization
+1. Use of more meaningful response status codes
+2. Try to create a standard shape for response object:
+
+```
+{
+  "success": Boolean // we might not need this if we utilize response status codes! Response.ok can be utilized too
+  "data": Array or Object
+  "message": programmatical error made by devs
+  "error": system generated error message
+}
+```
+3. Error Codes - (enum types)
+4. Message - can be non enum, for personalized message
+5. Review of resource / endpoint url structure
 
 
 ## Plan
