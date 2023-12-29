@@ -32,7 +32,6 @@ app.get('/api', (_, res) => {
   res.send('Server up.');
 });
 
-
 // NOTE: Auth
 app.post('/api/auth/register', (req, res) => {
   const { id, ...userDetails } = existingUser
@@ -40,23 +39,20 @@ app.post('/api/auth/register', (req, res) => {
   const isUserExisting = JSON.stringify(req.body) === JSON.stringify(userDetails)
   if (isUserExisting) {
     res.status(409).json({
-      success: false,
       message: 'User already exists!'
-    })    
+    })
     return;
   }
 
   const isPasswordLessThan8Characters = req.body.password.length < 8
   if (isPasswordLessThan8Characters) {
     res.status(400).json({
-      success: false,
       message: 'Password should be 8 characters or above!',
-    })    
+    })
     return;
   }
 
   res.status(201).json({
-    success: true,
     data: nonExistentUser,
   })
 })
@@ -71,7 +67,6 @@ app.post('/api/auth/login', (req, res) => {
 
   if (!isUserExisting || !isUserMatching) {
     res.status(404).json({
-      success: false,
       message: 'Username and password does not match!',
     }) 
     return;
@@ -79,7 +74,6 @@ app.post('/api/auth/login', (req, res) => {
   
   const { password: excluded, ...userDetails } = existingUser;
   res.status(200).json({
-    success: true,
     data: {
       ...userDetails,
       token: 'domainexpansion',
@@ -107,10 +101,7 @@ app.get('/api/posts/:user_id?', (req, res) => {
   const isTokenExisting = !!token
   if (!isTokenExisting) {
     res.status(401).json({
-      success: false,
-      error: {
-        message: 'Unauthorized post access!',
-      }
+      message: 'Unauthorized post access!',
     })
     return;
   }
@@ -163,7 +154,6 @@ app.get('/api/posts/:user_id?', (req, res) => {
 
   if (!user_id) {
     res.status(200).json({
-      success: true,
       data,
     })
     return;
@@ -174,7 +164,6 @@ app.get('/api/posts/:user_id?', (req, res) => {
     .map(post => ({ id: post.id, content: post.content  }))
 
   res.status(200).json({
-    success: true,
     data: filteredData,
   })
 })
@@ -185,7 +174,6 @@ app.post('/api/posts/:user_id', (req, res) => {
   const isTokenExisting = !!token
   if (!isTokenExisting) {
     res.status(401).json({
-      success: false,
       message: 'Unauthorized post creation!',
     })
     return;
@@ -194,17 +182,45 @@ app.post('/api/posts/:user_id', (req, res) => {
   const isMalformedRequestBody = !content
   if (isMalformedRequestBody) {
     res.status(400).json({
-      success: false,
       message: 'Malformed request!',
     })
     return;
   }
 
   res.status(201).json({
-    success: true,
     data: {
       id: Math.floor(Math.random()),
       content,
+    }
+  })
+})
+
+app.patch('/api/posts/:user_id', (req, res) => {
+  const { 
+    params: { user_id }, // TODO: use on PSQL integ
+    headers: { token },
+    body: { id, content }
+  } = req
+
+  const isTokenExisting = !!token
+  if (!isTokenExisting) {
+    res.status(401).json({
+      message: 'Unauthorized post update!',
+    })
+    return;
+  }
+
+  const isMalformedRequestBody = !content
+  if (isMalformedRequestBody) {
+    res.status(400).json({
+      message: 'Malformed request!',
+    })
+    return;
+  }
+
+  res.status(200).json({
+    data: {
+      id, content
     }
   })
 })
@@ -225,3 +241,6 @@ const server = app.listen(port, async () => {
     return;
   }  
 });
+
+// TODO:
+// 1. Research on middleware in terms of distinguishing routes that needs to be authorized / with token, and those that are public
