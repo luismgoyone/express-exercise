@@ -3,15 +3,13 @@ import { describe, it, expect, vi } from 'vitest';
 const url = process.env.URL || "http://localhost:3000";
 
 describe('exercise-express-pg api test', () => {
-  describe ('Initialization', () => {
-    it('should be up / return 200 on root access', async () => {
-      const response = await fetch(`${url}/api`);
-  
-      expect(response.status).toBe(200);
-    })
+  it('should be up / return 200 on root access', async () => {
+    const response = await fetch(`${url}/api`);
+
+    expect(response.status).toBe(200);
   })
 
-  describe('User Registration', () => {
+  describe('Register User', () => {
     // TODO: Use only one user mock to sequentially test:
     // 1. creation of new user
     // 2. checking of existing user
@@ -97,7 +95,7 @@ describe('exercise-express-pg api test', () => {
     })
   })
 
-  describe('User Login', () => {
+  describe('Login User', () => {
     it('should login existing user', async () => {
       const existingUser = {
         first_name: 'gojo',
@@ -182,7 +180,7 @@ describe('exercise-express-pg api test', () => {
     })
   })
 
-  describe('User Logout', () => {
+  describe('Logout User', () => {
     it('should logout successfully with right params', async () => {
       const response = await fetch(`${url}/api/auth/logout`, {
         headers: {
@@ -225,7 +223,7 @@ describe('exercise-express-pg api test', () => {
     })
   })
 
-  describe('All Posts', () => {
+  describe('Read All Posts', () => {
     it('should return all posts sorted by most recent created_at', async () => {
       const response = await fetch(`${url}/api/posts`, {
         headers: {
@@ -257,7 +255,7 @@ describe('exercise-express-pg api test', () => {
       expect(unsorted).toStrictEqual(sorted)
     })
 
-    it('should return error if token is invalid', async () => {
+    it('should return error if invalid token', async () => {
       const response = await fetch(`${url}/api/posts`, {
         headers: {
           'Content-Type': 'application/json',
@@ -275,7 +273,7 @@ describe('exercise-express-pg api test', () => {
     })
   })
 
-  describe('User Posts', () => {
+  describe('Read User Posts', () => {
     it('should return user posts sorted by most recent created_at', async () => {
       const response = await fetch(`${url}/api/posts/3`, {
         headers: {
@@ -316,7 +314,7 @@ describe('exercise-express-pg api test', () => {
       expect(unsorted).toStrictEqual(sorted)
     })
 
-    it.todo('should return error if token is invalid', async () => {
+    it('should return error if invalid token', async () => {
       const response = await fetch(`${url}/api/posts/3`, {
         headers: {
           'Content-Type': 'application/json',
