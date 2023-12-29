@@ -225,6 +225,12 @@ app.patch('/api/posts/:user_id', (req, res) => {
   })
 })
 
+app.delete('/api/posts/:user_id', (req, res) => {
+  const { params: { user_id } } = req
+
+  res.sendStatus(204);
+})
+
 const server = app.listen(port, async () => {
   try {
     const dbInitialized = await db.init();

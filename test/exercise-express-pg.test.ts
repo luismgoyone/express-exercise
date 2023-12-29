@@ -361,9 +361,10 @@ describe('exercise-express-pg api test', () => {
       })      
     })
 
-    it('should return error if creating post with no token', async () => {
+    it('should return error if invalid token', async () => {
       const content = 'searching for someone to blame is such a pain.';
 
+      // NOTE: No token case. TODO: Add token mismatch case
       const response = await fetch(`${url}/api/posts/1`, {
         headers: {
           'Content-Type': 'application/json',
@@ -383,7 +384,7 @@ describe('exercise-express-pg api test', () => {
       })      
     })
 
-    it('should return error if creating post with malformed request body', async () => {
+    it('should return error if malformed request body', async () => {
       const response = await fetch(`${url}/api/posts/1`, {
         headers: {
           'Content-Type': 'application/json',
@@ -428,7 +429,7 @@ describe('exercise-express-pg api test', () => {
       expect(body.data).toEqual(payload)
     })
 
-    it('should return error if token is invalid', async () => {
+    it('should return error if invalid token', async () => {
       const payload = {
         id: 2,
         content: 'you’re lucky if you can die a normal death...',
@@ -451,7 +452,7 @@ describe('exercise-express-pg api test', () => {
       })
     })
 
-    it('should return error if updating post with malformed request body', async () => {
+    it('should return error if malformed request body', async () => {
       const response = await fetch(`${url}/api/posts/1`, {
         headers: {
           'Content-Type': 'application/json',
@@ -470,6 +471,36 @@ describe('exercise-express-pg api test', () => {
       expect(body).toEqual({
         message: 'Malformed request!',
       })       
+    })
+  })
+
+  describe('Delete Post', () => {
+    it('should delete post', async () => {
+      const response = await fetch(`${url}/api/posts/1`, {
+        headers: {
+          'Content-Type': 'application/json',
+          token: 'domainexpansion',
+        },
+        method: 'DELETE',
+      });
+
+      const { status } = response;
+
+      expect(status).toBe(204);
+    })
+
+    it('should return error if invalid token', async () => {
+      const response = await fetch(`${url}/api/posts/1`, {
+        headers: {
+          'Content-Type': 'application/json',
+          token: 'domainexpansion',
+        },
+        method: 'DELETE',
+      });
+
+      const { status } = response;
+
+      expect(status).toBe(204);
     })
   })
 })
