@@ -1,0 +1,16 @@
+{
+  "name": "auteur",
+  "version": "1.0.0",
+  "description": "automated testing exploration using vitest and playwright for booky things",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "maurusrv",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "vitest": "^1.1.0"
+  }
+}
