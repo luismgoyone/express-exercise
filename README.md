@@ -32,6 +32,7 @@
 3. Error Codes - (enum types)
 4. Message - can be non enum, for personalized message
 5. Review of resource / endpoint url structure
+6. [About modelling json api](https://stackoverflow.com/a/14538774)
 
 
 ## Plan

@@ -1,6 +1,8 @@
 import express from 'express';
+import expressOpenApi, { SPEC_OUTPUT_FILE_BEHAVIOR } from 'express-oas-generator';
 import * as db from './db';
 
+// NOTE: Mock
 const nonExistentUser = {
   id: 666,
   first_name: 'sukuna',
@@ -17,23 +19,53 @@ const existingUser = {
   password: 'sixeyes',
 }
 
-const app = express();
 const port = process.env.PORT;
+
+const app = express();
+
+// NOTE: Middlewares
+expressOpenApi.handleResponses(app, {
+  predefinedSpec: {
+    info: {
+      title: 'Joppet\'s API Exercise Express Implementation',
+      version: "0.0.0",
+      description: "Testing lang",
+    },
+    tags: [
+      {
+        name: 'auth',
+        description: 'user creation and authentication',
+      },
+      {
+        name: 'posts',
+        description: 'user posts operations',
+      },
+    ]
+  },
+  tags: ['auth', 'posts'],
+  specOutputPath: 'docs/api.json',
+  specOutputFileBehavior: SPEC_OUTPUT_FILE_BEHAVIOR.RECREATE,
+  swaggerDocumentOptions: null,
+});
 
 app.use(express.json());
 
+// NOTE: Logger
 app.use((req, res, next) => {
   console.log(`[server | ${new Date().toISOString()}] ${req.method} ${req.url}`);
   console.log(req.body)
   next();
 });
 
-app.get('/api', (_, res) => {
+// NOTE: Routes
+const router = express.Router()
+router.route('/api').get((_, res, next) => {
   res.send('Server up.');
+  next();
 });
 
 // NOTE: Auth
-app.post('/api/auth/register', (req, res) => {
+router.route('/api/auth/register').post((req, res, next) => {
   const { id, ...userDetails } = existingUser
 
   const isUserExisting = JSON.stringify(req.body) === JSON.stringify(userDetails)
@@ -41,6 +73,7 @@ app.post('/api/auth/register', (req, res) => {
     res.status(409).json({
       message: 'User already exists!'
     })
+    next();
     return;
   }
 
@@ -49,15 +82,17 @@ app.post('/api/auth/register', (req, res) => {
     res.status(400).json({
       message: 'Password should be 8 characters or above!',
     })
+    next();
     return;
   }
 
   res.status(201).json({
     data: nonExistentUser,
   })
+  next();
 })
 
-app.post('/api/auth/login', (req, res) => {
+router.route('/api/auth/login').post((req, res, next) => {
   const { username, password } = req.body;
 
   const nonExistentUsername = 'panda'
@@ -69,6 +104,7 @@ app.post('/api/auth/login', (req, res) => {
     res.status(404).json({
       message: 'Username and password does not match!',
     }) 
+    next();
     return;
   }
   
@@ -79,30 +115,34 @@ app.post('/api/auth/login', (req, res) => {
       token: 'domainexpansion',
     },
   })
+  next();
 })
 
-app.post('/api/auth/logout', (req, res) => {
+router.route('/api/auth/logout').post((req, res, next) => {
   const { headers: { token }, body: { username } } = req
 
   const isTokenExisting = !!token
   const isUsernameExisting = !!username
   if (!isTokenExisting || !isUsernameExisting) {
-    res.sendStatus(400)
+    res.sendStatus(400);
+    next();
     return;
   }
 
-  res.sendStatus(205)
+  res.sendStatus(205);
+  next();
 })
 
 // Posts
-app.get('/api/posts/:user_id?', (req, res) => {
-  const { headers: { token }, params: { user_id } } = req
+router.route('/api/posts').get((req, res, next) => {
+  const { headers: { token } } = req
 
   const isTokenExisting = !!token
   if (!isTokenExisting) {
     res.status(401).json({
       message: 'Unauthorized post access!',
     })
+    next();
     return;
   }
 
@@ -152,12 +192,70 @@ app.get('/api/posts/:user_id?', (req, res) => {
 
   data.sort((a, b) => (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
 
-  if (!user_id) {
-    res.status(200).json({
-      data,
+  res.status(200).json({
+    data,
+  })
+  next();
+})
+
+
+router.route('/api/posts/:user_id').get((req, res, next) => {
+  const { headers: { token }, params: { user_id } } = req
+
+  const isTokenExisting = !!token
+  if (!isTokenExisting) {
+    res.status(401).json({
+      message: 'Unauthorized post access!',
     })
+    next();
     return;
   }
+
+  let data = []
+  const date = new Date()
+  date.setHours(date.getHours() + 5)
+  data.push({
+    id: 2,
+    content: "i don't know how i'll feel when i'm dead, but i don't want to regret the way i lived.",
+    first_name: 'yuji',
+    last_name: 'itadori',
+    username: 'enchain',
+    created_at: date.toISOString(),
+  })
+  date.setHours(date.getHours() - 40)
+  data.push({
+    id: 3,
+    content: "what makes us obligated to meet such perfection or such absurd standards?",
+    first_name: 'nobara',
+    last_name: 'kugisaki',
+    username: 'hairpin',
+    created_at: date.toISOString(),
+  })
+  date.setHours(date.getHours() + 20)
+  data.push({
+    id: 4,
+    content: "i want more good people to enjoy fairness, even if only a few.",
+    first_name: 'megumi',
+    last_name: 'fushiguro',
+    username: 'tenshadows',
+    created_at: date.toISOString(),
+  },)
+  data.push({
+    id: 4,
+    content: "it's not about whether i can. i have to do it.",
+    first_name: 'megumi',
+    last_name: 'fushiguro',
+    username: 'tenshadows',
+    created_at: date.toISOString(),
+  })
+
+  const users: Record<string, number> = {
+    'tenshadows': 1,
+    'hairpin': 2,
+    'enchain': 3
+  }
+
+  data.sort((a, b) => (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
 
   const filteredData = data
     .filter((post) => Number(user_id) === users[post.username])
@@ -166,9 +264,10 @@ app.get('/api/posts/:user_id?', (req, res) => {
   res.status(200).json({
     data: filteredData,
   })
+  next();
 })
 
-app.post('/api/posts/:user_id', (req, res) => {
+router.route('/api/posts/:user_id').post((req, res, next) => {
   const { body: { content }, params: { user_id }, headers: { token } } = req
 
   const isTokenExisting = !!token
@@ -176,6 +275,7 @@ app.post('/api/posts/:user_id', (req, res) => {
     res.status(401).json({
       message: 'Unauthorized post creation!',
     })
+    next();
     return;
   }
 
@@ -184,6 +284,7 @@ app.post('/api/posts/:user_id', (req, res) => {
     res.status(400).json({
       message: 'Malformed request!',
     })
+    next();
     return;
   }
 
@@ -193,9 +294,10 @@ app.post('/api/posts/:user_id', (req, res) => {
       content,
     }
   })
+  next();
 })
 
-app.patch('/api/posts/:user_id', (req, res) => {
+router.route('/api/posts/:user_id').patch((req, res, next) => {
   const { 
     params: { user_id }, // TODO: use on PSQL integ
     headers: { token },
@@ -207,6 +309,7 @@ app.patch('/api/posts/:user_id', (req, res) => {
     res.status(401).json({
       message: 'Unauthorized post update!',
     })
+    next();
     return;
   }
 
@@ -215,6 +318,7 @@ app.patch('/api/posts/:user_id', (req, res) => {
     res.status(400).json({
       message: 'Malformed request!',
     })
+    next();
     return;
   }
 
@@ -223,13 +327,19 @@ app.patch('/api/posts/:user_id', (req, res) => {
       id, content
     }
   })
+  next();
 })
 
-app.delete('/api/posts/:user_id', (req, res) => {
+router.route('/api/posts/:user_id').delete((req, res, next) => {
   const { params: { user_id } } = req
 
   res.sendStatus(204);
+  next();
 })
+
+app.use(router);
+
+expressOpenApi.handleRequests();
 
 const server = app.listen(port, async () => {
   try {
