@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+// CREATE
+
 func addUserAccount(userAccount *UserAccount) (UserAccount, error) {
 	userId, err := insertUser(userAccount.User)
 	if err != nil {
@@ -15,7 +17,7 @@ func addUserAccount(userAccount *UserAccount) (UserAccount, error) {
 		return *userAccount, err
 	}
 
-	newUserAccount, err := getUserAccount(userId)
+	newUserAccount, err := getUserAccountByUserId(userId)
 	if err != nil {
 		fmt.Print(userId, userLoginId, userAccount.id, userAccount.user_id)
 		return *userAccount, err
@@ -24,7 +26,9 @@ func addUserAccount(userAccount *UserAccount) (UserAccount, error) {
 	return newUserAccount, nil
 }
 
-func getUserAccount(userId int) (UserAccount, error) {
+// READ
+
+func getUserAccountByUserId(userId int) (UserAccount, error) {
 	var userAccount UserAccount
 	sqlStatement := `
 		SELECT
