@@ -46,7 +46,44 @@ func getUserAccountByUserId(userId int) (UserAccount, error) {
 			id = $1
 	`
 	row := db.QueryRow(sqlStatement, userId)
-	err := row.Scan(&userAccount.id, &userAccount.first_name, &userAccount.last_name, &userAccount.username)
+	err := row.Scan(
+		&userAccount.id,
+		&userAccount.first_name,
+		&userAccount.last_name,
+		&userAccount.username,
+	)
+	if err != nil {
+		return userAccount, fmt.Errorf("getUserAccount: %v", err)
+	}
+	return userAccount, nil
+}
+
+func getUserAccountByUsername(username string) (UserAccount, error) {
+	var userAccount UserAccount
+	sqlStatement := `
+		SELECT
+			id,
+			first_name,
+			last_name,
+			username,
+			token
+		FROM
+			users
+		INNER JOIN
+			user_logins
+		ON
+			id = user_id
+		WHERE
+			username = $1
+	`
+	row := db.QueryRow(sqlStatement, username)
+	err := row.Scan(
+		&userAccount.id,
+		&userAccount.first_name,
+		&userAccount.last_name,
+		&userAccount.username,
+		&userAccount.token,
+	)
 	if err != nil {
 		return userAccount, fmt.Errorf("getUserAccount: %v", err)
 	}
