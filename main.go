@@ -41,7 +41,7 @@ func main() {
 
 	router := gin.Default()
 
-	router.POST("/register", postUserAccount)
+	router.POST("/register", createUserAccount)
 	router.Run("localhost:8080")
 }
 
@@ -63,7 +63,7 @@ func jsonifyErrors(errors []error) ErrorJson {
 
 // POST
 
-func postUserAccount(c *gin.Context) {
+func createUserAccount(c *gin.Context) {
 	type PostUserBody struct {
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
