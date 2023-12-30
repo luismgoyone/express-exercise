@@ -1,7 +1,7 @@
 {
   "definitions": {},
   "info": {
-    "title": "Joppet's API Exercise Express Implementation",
+    "title": "Joppet's API Exercise - Express Implementation",
     "version": "0.0.0",
     "license": {
       "name": "ISC"
@@ -9,9 +9,9 @@
     "description": "Testing lang"
   },
   "paths": {
-    "/api": {
+    "/api/status": {
       "get": {
-        "summary": "/api",
+        "summary": "/api/status",
         "consumes": [
           "application/json"
         ],
@@ -20,14 +20,21 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "string",
-              "example": "Server up."
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Server up!"
+                }
+              }
             }
           }
         },
-        "tags": [],
+        "tags": [
+          "status"
+        ],
         "produces": [
-          "text/html"
+          "application/json"
         ]
       }
     },
@@ -55,7 +62,7 @@
                 },
                 "username": {
                   "type": "string",
-                  "example": "malevolent"
+                  "example": "ny6f24dl"
                 },
                 "password": {
                   "type": "string",
@@ -76,7 +83,7 @@
                   "properties": {
                     "id": {
                       "type": "number",
-                      "example": 666
+                      "example": 22
                     },
                     "first_name": {
                       "type": "string",
@@ -88,37 +95,9 @@
                     },
                     "username": {
                       "type": "string",
-                      "example": "malevolent"
-                    },
-                    "password": {
-                      "type": "string",
-                      "example": "******"
+                      "example": "ny6f24dl"
                     }
                   }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Password should be 8 characters or above!"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "User already exists!"
                 }
               }
             }
@@ -138,78 +117,10 @@
         "consumes": [
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "username": {
-                  "type": "string",
-                  "example": "limitless"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "******"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "number",
-                      "example": 1
-                    },
-                    "first_name": {
-                      "type": "string",
-                      "example": "gojo"
-                    },
-                    "last_name": {
-                      "type": "string",
-                      "example": "satoru"
-                    },
-                    "username": {
-                      "type": "string",
-                      "example": "limitless"
-                    },
-                    "token": {
-                      "type": "string",
-                      "example": "domainexpansion"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Username and password does not match!"
-                }
-              }
-            }
-          }
-        },
+        "parameters": [],
+        "responses": {},
         "tags": [
           "auth"
-        ],
-        "produces": [
-          "application/json"
         ]
       }
     },
@@ -219,43 +130,10 @@
         "consumes": [
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "username": {
-                  "type": "string",
-                  "example": "satoru"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "205": {
-            "description": "Reset Content",
-            "schema": {
-              "type": "integer",
-              "example": 0
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "string",
-              "example": "Bad Request"
-            }
-          }
-        },
+        "parameters": [],
+        "responses": {},
         "tags": [
           "auth"
-        ],
-        "produces": [
-          "text/plain"
         ]
       }
     },
@@ -266,77 +144,9 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "number"
-                      },
-                      "content": {
-                        "type": "string"
-                      },
-                      "first_name": {
-                        "type": "string"
-                      },
-                      "last_name": {
-                        "type": "string"
-                      },
-                      "username": {
-                        "type": "string"
-                      },
-                      "created_at": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "content",
-                      "first_name",
-                      "last_name",
-                      "username",
-                      "created_at"
-                    ]
-                  },
-                  "example": [
-                    {
-                      "id": 3,
-                      "content": "what makes us obligated to meet such perfection or such absurd standards?",
-                      "first_name": "nobara",
-                      "last_name": "kugisaki",
-                      "username": "hairpin",
-                      "created_at": "2023-12-27T22:57:56.827Z"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Unauthorized post access!"
-                }
-              }
-            }
-          }
-        },
+        "responses": {},
         "tags": [
           "posts"
-        ],
-        "produces": [
-          "application/json"
         ]
       }
     },
@@ -350,58 +160,12 @@
           {
             "name": "user_id",
             "in": "path",
-            "required": true,
-            "type": "integer",
-            "example": 3
+            "required": true
           }
         ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "number"
-                      },
-                      "content": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "id": 2,
-                      "content": "i don't know how i'll feel when i'm dead, but i don't want to regret the way i lived."
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Unauthorized post access!"
-                }
-              }
-            }
-          }
-        },
+        "responses": {},
         "tags": [
           "posts"
-        ],
-        "produces": [
-          "application/json"
         ]
       },
       "post": {
@@ -413,77 +177,12 @@
           {
             "name": "user_id",
             "in": "path",
-            "required": true,
-            "type": "integer",
-            "example": 1
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "content": {
-                  "type": "string",
-                  "example": "searching for someone to blame is such a pain."
-                }
-              }
-            }
+            "required": true
           }
         ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "number",
-                      "example": 0
-                    },
-                    "content": {
-                      "type": "string",
-                      "example": "searching for someone to blame is such a pain."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Malformed request!"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Unauthorized post creation!"
-                }
-              }
-            }
-          }
-        },
+        "responses": {},
         "tags": [
           "posts"
-        ],
-        "produces": [
-          "application/json"
         ]
       },
       "patch": {
@@ -495,81 +194,12 @@
           {
             "name": "user_id",
             "in": "path",
-            "required": true,
-            "type": "integer",
-            "example": 1
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "number",
-                  "example": 2
-                },
-                "content": {
-                  "type": "string",
-                  "example": "you’re lucky if you can die a normal death..."
-                }
-              }
-            }
+            "required": true
           }
         ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "number",
-                      "example": 2
-                    },
-                    "content": {
-                      "type": "string",
-                      "example": "you’re lucky if you can die a normal death..."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Malformed request!"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Unauthorized post update!"
-                }
-              }
-            }
-          }
-        },
+        "responses": {},
         "tags": [
           "posts"
-        ],
-        "produces": [
-          "application/json"
         ]
       },
       "delete": {
@@ -581,14 +211,10 @@
           {
             "name": "user_id",
             "in": "path",
-            "required": true,
-            "type": "integer",
-            "example": 1
+            "required": true
           }
         ],
-        "responses": {
-          "204": {}
-        },
+        "responses": {},
         "tags": [
           "posts"
         ]
@@ -604,6 +230,9 @@
     {
       "name": "posts",
       "description": "user posts operations"
+    },
+    {
+      "name": "posts"
     }
   ],
   "schemes": [

@@ -33,7 +33,11 @@
 4. Message - can be non enum, for personalized message
 5. Review of resource / endpoint url structure
 6. [About modelling json api](https://stackoverflow.com/a/14538774)
-
+- JSend opinionated about status as required on message body, i need an example for this:
+> The spec is meant to be as small, constrained, and generally-applicable as possible. As such, it has to be somewhat self-contained. A common pattern for implementing JSON services is to load a JavaScript file which passes a JSON block into a user-specified callback. JSON-over-XHR handling in many JavaScript frameworks follows similar patterns. As such, the end-user (developer) never has a chance to access the HTTP response itself.
+- JSONAPI needs to be setup.
+7. What's more expensive, sql or code manipulation?
+8. Better rollback system for developing queries?
 
 ## Plan
 - [ ] Vitest + Playwright (API Testing)

@@ -1,6 +1,10 @@
 import express from 'express';
 import expressOpenApi, { SPEC_OUTPUT_FILE_BEHAVIOR } from 'express-oas-generator';
-import * as db from './db';
+import { initializeDB } from './db';
+import { 
+  IDatabase, 
+  // ParameterizedQuery 
+} from 'pg-promise';
 
 // NOTE: Mock
 const nonExistentUser = {
@@ -13,21 +17,23 @@ const nonExistentUser = {
 
 const existingUser = {
   id: 1,
-  first_name: 'gojo',
-  last_name: 'satoru',
-  username: 'limitless',
-  password: 'sixeyes',
+  first_name: 'satoru',
+  last_name: 'gojo',
+  username: 'sixeyes',
+  password: 'limitless',
 }
 
 const port = process.env.PORT;
 
 const app = express();
 
+let db: null | IDatabase<any> = null;
+
 // NOTE: Middlewares
 expressOpenApi.handleResponses(app, {
   predefinedSpec: {
     info: {
-      title: 'Joppet\'s API Exercise Express Implementation',
+      title: 'Joppet\'s API Exercise - Express Implementation',
       version: "0.0.0",
       description: "Testing lang",
     },
@@ -42,7 +48,7 @@ expressOpenApi.handleResponses(app, {
       },
     ]
   },
-  tags: ['auth', 'posts'],
+  tags: ['status', 'auth', 'posts'],
   specOutputPath: 'docs/api.json',
   specOutputFileBehavior: SPEC_OUTPUT_FILE_BEHAVIOR.RECREATE,
   swaggerDocumentOptions: null,
@@ -53,31 +59,32 @@ app.use(express.json());
 // NOTE: Logger
 app.use((req, res, next) => {
   console.log(`[server | ${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log(req.body)
+  console.log(req.body);
   next();
 });
 
 // NOTE: Routes
 const router = express.Router()
-router.route('/api').get((_, res, next) => {
-  res.send('Server up.');
+router.route('/api/status').get((_, res, next) => {
+  res.status(200).json({
+    message: 'Server up!'
+  });
   next();
 });
 
 // NOTE: Auth
-router.route('/api/auth/register').post((req, res, next) => {
-  const { id, ...userDetails } = existingUser
+router.route('/api/auth/register').post(async (req, res, next) => {
+  const {
+    body: {
+      username,
+      password,
+      first_name,
+      last_name,
+    }
+  } = req;
 
-  const isUserExisting = JSON.stringify(req.body) === JSON.stringify(userDetails)
-  if (isUserExisting) {
-    res.status(409).json({
-      message: 'User already exists!'
-    })
-    next();
-    return;
-  }
-
-  const isPasswordLessThan8Characters = req.body.password.length < 8
+  // TODO: Add bcrypt?
+  const isPasswordLessThan8Characters = password.length < 8
   if (isPasswordLessThan8Characters) {
     res.status(400).json({
       message: 'Password should be 8 characters or above!',
@@ -86,9 +93,64 @@ router.route('/api/auth/register').post((req, res, next) => {
     return;
   }
 
-  res.status(201).json({
-    data: nonExistentUser,
-  })
+  // REVIEW: SELECT * is more expensive than SELECT username
+  
+  // REVIEW: More explicit:
+  // const findUsernameByUsername = new ParameterizedQuery({
+  //   text: 'SELECT username FROM user_logins WHERE username = $1', 
+  //   values: [username]
+  // });
+
+  if (!db) {
+    res.sendStatus(500);
+    next();
+    return;
+  }
+  
+  try {
+    const findUsernameQueryResponse = await db.oneOrNone(
+      'SELECT username FROM user_logins WHERE username = $1',
+      username,
+    );
+    const isUsernameExisting = !!findUsernameQueryResponse;
+    if (isUsernameExisting) {
+      res.status(409).json({
+        message: 'User already exists!'
+      })
+      next();
+      return;
+    }
+
+    const createUserQueryResponse = await db.one(
+      `
+        WITH 
+          new_user AS (
+          INSERT INTO users (first_name, last_name) 
+            VALUES ($1, $2)
+            RETURNING id, first_name, last_name
+          ), 
+          new_login AS (
+            INSERT INTO user_logins (user_id, username, password) 
+            VALUES (
+              (SELECT id from new_user), $3, $4
+            ) 
+            RETURNING username
+          )
+        SELECT * from new_user CROSS JOIN new_login;
+      `,
+      [first_name, last_name, username, password],
+    )
+
+    res.status(201).json({
+      data: createUserQueryResponse,
+    })
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      message: 'Something went wrong!',
+    });
+  }
+
   next();
 })
 
@@ -343,8 +405,8 @@ expressOpenApi.handleRequests();
 
 const server = app.listen(port, async () => {
   try {
-    const dbInitialized = await db.init();
-    if (!dbInitialized) {
+    db = await initializeDB();
+    if (!db) {
       server.close((error) => {
         console.error('[server]: Server closing...');
         process.exit(error ? 1 : 0);

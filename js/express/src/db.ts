@@ -1,4 +1,5 @@
-import pgPromise from 'pg-promise';
+import pgPromise, { IDatabase } from 'pg-promise';
+import pgMonitor from 'pg-monitor';
 
 const pgp = pgPromise();
 
@@ -10,11 +11,14 @@ const dbConfig = {
   // password: '',
 }
 
-const init = async (): Promise<boolean> => {
+const initializeDB = async () => {
   console.info('[db]: Initializing database...')
+  
+  let db = null;
 
   try {
-    const db = pgp(dbConfig);
+    db = pgp(dbConfig);
+    pgMonitor.attach(dbConfig);
 
     // const isDBExisting = await db.oneOrNone('SELECT 1 FROM pg_database WHERE datname = $1', 'eep');
     // if (!isDBExisting) {
@@ -37,21 +41,24 @@ const init = async (): Promise<boolean> => {
 
     // console.info('[db]: Database detected.');
 
-    await initializeTables();
+    db = await initializeTables();
 
     console.info('[db]: Database initialized.')
-    return true;
+    return db;
   } catch (error) {
     console.error('[db]: Error initializing database:', error);
-    return false;
+    return null;
   }
 }
 
 const initializeTables = async () => {
   console.info('[db]: Initializing tables...');
-
+  let db = null
   try {
-    const db = pgp({ ...dbConfig, database: 'eep' })
+    const updatedDBConfig = { ...dbConfig, database: 'eep' }
+    db = pgp(updatedDBConfig);
+    pgMonitor.detach();
+    pgMonitor.attach(updatedDBConfig);
     await db.none(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -76,6 +83,7 @@ const initializeTables = async () => {
     `);
 
     console.info('[db]: Tables initialized.')
+    return db;
   } catch(error) {
     console.error('[db]: Error creating tables:', error);
     return;
@@ -83,5 +91,5 @@ const initializeTables = async () => {
 }
 
 export {
-  init,
+  initializeDB,
 }
