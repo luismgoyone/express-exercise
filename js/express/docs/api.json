@@ -1,7 +1,7 @@
 {
   "definitions": {},
   "info": {
-    "title": "Joppet's API Exercise - Express Implementation",
+    "title": "Joppet's API Exercise - Express (Basic Node) Implementation",
     "version": "0.0.0",
     "license": {
       "name": "ISC"
@@ -38,9 +38,9 @@
         ]
       }
     },
-    "/api/auth/register": {
+    "/api/auth": {
       "post": {
-        "summary": "/api/auth/register",
+        "summary": "/api/auth",
         "consumes": [
           "application/json"
         ],
@@ -62,7 +62,7 @@
                 },
                 "username": {
                   "type": "string",
-                  "example": "ny6f24dl"
+                  "example": "ktocl2mv"
                 },
                 "password": {
                   "type": "string",
@@ -83,7 +83,7 @@
                   "properties": {
                     "id": {
                       "type": "number",
-                      "example": 22
+                      "example": 5
                     },
                     "first_name": {
                       "type": "string",
@@ -95,9 +95,33 @@
                     },
                     "username": {
                       "type": "string",
-                      "example": "ny6f24dl"
+                      "example": "ktocl2mv"
                     }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Password should be 8 characters or above!"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "User already exists!"
                 }
               }
             }
@@ -111,47 +135,27 @@
         ]
       }
     },
-    "/api/auth/login": {
+    "/api/auth/{id}": {
       "post": {
-        "summary": "/api/auth/login",
+        "summary": "/api/auth/{id}",
         "consumes": [
           "application/json"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {},
         "tags": [
           "auth"
-        ]
-      }
-    },
-    "/api/auth/logout": {
-      "post": {
-        "summary": "/api/auth/logout",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [],
-        "responses": {},
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/posts": {
-      "get": {
-        "summary": "/api/posts",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [],
-        "responses": {},
-        "tags": [
-          "posts"
         ]
       }
     },
     "/api/posts/{user_id}": {
-      "get": {
+      "post": {
         "summary": "/api/posts/{user_id}",
         "consumes": [
           "application/json"
@@ -168,7 +172,7 @@
           "posts"
         ]
       },
-      "post": {
+      "get": {
         "summary": "/api/posts/{user_id}",
         "consumes": [
           "application/json"
@@ -214,6 +218,19 @@
             "required": true
           }
         ],
+        "responses": {},
+        "tags": [
+          "posts"
+        ]
+      }
+    },
+    "/api/posts": {
+      "get": {
+        "summary": "/api/posts",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
         "responses": {},
         "tags": [
           "posts"

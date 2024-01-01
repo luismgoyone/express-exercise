@@ -1,6 +1,6 @@
 import express from 'express';
 import expressOpenApi, { SPEC_OUTPUT_FILE_BEHAVIOR } from 'express-oas-generator';
-import { initializeDB } from './db';
+import { initializeDB, resetDB } from './db';
 import { 
   IDatabase, 
   // ParameterizedQuery 
@@ -33,7 +33,7 @@ let db: null | IDatabase<any> = null;
 expressOpenApi.handleResponses(app, {
   predefinedSpec: {
     info: {
-      title: 'Joppet\'s API Exercise - Express Implementation',
+      title: 'Joppet\'s API Exercise - Express (Basic Node) Implementation',
       version: "0.0.0",
       description: "Testing lang",
     },
@@ -70,21 +70,33 @@ router.route('/api/status').get((_, res, next) => {
     message: 'Server up!'
   });
   next();
+  return;
 });
 
 // NOTE: Auth
-router.route('/api/auth/register').post(async (req, res, next) => {
-  const {
-    body: {
-      username,
-      password,
-      first_name,
-      last_name,
-    }
-  } = req;
+router.route('/api/auth').post(async (req, res, next) => {
+  const { body } = req;
+
+  const isUserLogin = Object.keys(body).length === 2
+    && body.username
+    && body.password
+    
+  const isUserRegistration = Object.keys(body).length === 4
+    && body.first_name
+    && body.last_name
+    && body.username
+    && body.password
+
+  if (!isUserLogin && !isUserRegistration) {
+    res.status(400).json({
+      message: 'Malformed content!',
+    })
+    next();
+    return;
+  }
 
   // TODO: Add bcrypt?
-  const isPasswordLessThan8Characters = password.length < 8
+  const isPasswordLessThan8Characters = body.password.length < 8
   if (isPasswordLessThan8Characters) {
     res.status(400).json({
       message: 'Password should be 8 characters or above!',
@@ -93,109 +105,255 @@ router.route('/api/auth/register').post(async (req, res, next) => {
     return;
   }
 
-  // REVIEW: SELECT * is more expensive than SELECT username
-  
-  // REVIEW: More explicit:
-  // const findUsernameByUsername = new ParameterizedQuery({
-  //   text: 'SELECT username FROM user_logins WHERE username = $1', 
-  //   values: [username]
-  // });
-
   if (!db) {
-    res.sendStatus(500);
+    res.status(500).json({
+      message: 'Something went wrong!',
+    });
     next();
     return;
   }
-  
+
   try {
-    const findUsernameQueryResponse = await db.oneOrNone(
-      'SELECT username FROM user_logins WHERE username = $1',
-      username,
-    );
-    const isUsernameExisting = !!findUsernameQueryResponse;
-    if (isUsernameExisting) {
-      res.status(409).json({
-        message: 'User already exists!'
+    if (isUserRegistration) {
+      // REVIEW: SELECT * is more expensive than SELECT username
+    
+      // REVIEW: More explicit:
+      // const findUsernameByUsername = new ParameterizedQuery({
+      //   text: 'SELECT username FROM user_logins WHERE username = $1', 
+      //   values: [username]
+      // });
+
+      // REVIEW: This is if separated from the main query for creation
+      // const findUsernameQueryResponse = await db.oneOrNone(
+      //   'SELECT username FROM user_logins WHERE username = $1',
+      //   body.username,
+      // );
+      // const isUsernameExisting = !!findUsernameQueryResponse;
+      // if (isUsernameExisting) {
+      //   res.status(409).json({
+      //     message: 'User already exists!'
+      //   })
+      //   next();
+      //   return;
+      // }
+  
+      const registerUserQueryResponse = await db.oneOrNone(
+        `
+          WITH 
+            new_user AS (
+              INSERT INTO users (first_name, last_name) 
+                SELECT $1, $2
+                  WHERE NOT EXISTS (
+                    SELECT 1 
+                      FROM user_logins 
+                        WHERE username = $3    
+                  )
+                    RETURNING id, first_name, last_name
+            ), 
+            new_login AS (
+              INSERT INTO user_logins (user_id, username, password)
+                SELECT (SELECT id FROM new_user), $3, $4
+                  WHERE NOT EXISTS (
+                    SELECT 1 
+                      FROM user_logins 
+                        WHERE username = $3    
+                  )
+                    RETURNING username
+            ) 
+            SELECT * FROM new_user CROSS JOIN new_login;
+        `,
+        [body.first_name, body.last_name, body.username, body.password],
+      )
+
+      const isUsernameExisting = !registerUserQueryResponse
+      if (isUsernameExisting)  {
+        res.status(409).json({
+          message: 'User already exists!'
+        })
+        next();
+        return;
+      }
+
+      res.status(201).json({
+        data: registerUserQueryResponse,
       })
       next();
       return;
     }
 
-    const createUserQueryResponse = await db.one(
-      `
-        WITH 
-          new_user AS (
-          INSERT INTO users (first_name, last_name) 
-            VALUES ($1, $2)
-            RETURNING id, first_name, last_name
-          ), 
-          new_login AS (
-            INSERT INTO user_logins (user_id, username, password) 
-            VALUES (
-              (SELECT id from new_user), $3, $4
-            ) 
-            RETURNING username
-          )
-        SELECT * from new_user CROSS JOIN new_login;
-      `,
-      [first_name, last_name, username, password],
-    )
+    if (isUserLogin) {
+      // const findUsernameQueryResponse = await db.oneOrNone(
+      //   'SELECT username FROM user_logins WHERE username = $1',
+      //   body.username,
+      // );
+      // const isUsernameExisting = !!findUsernameQueryResponse;
+      // if (!isUsernameExisting) {
+      //   res.status(404).json({
+      //     message: 'Username and password does not match!',
+      //   }) 
+      //   next();
+      //   return; 
+      // }
 
-    res.status(201).json({
-      data: createUserQueryResponse,
-    })
+      // Generate new token
+      const newToken = Math.random().toString(36).substring(2, 10)
+  
+    
+      // TODO: use bcrypt
+      const loginQueryResponse = await db.oneOrNone(
+        // ` REVIEW: Without username check
+        //   SELECT 
+        //     ul.user_id AS id, 
+        //     u.first_name, 
+        //     u.last_name, 
+        //     ul.username, 
+        //     ul.token
+        //     FROM user_logins ul
+        //       JOIN users u ON ul.user_id = u.id
+        //         WHERE username = $1 AND password = $2;
+        // `,
+        `
+          WITH 
+            new_login AS (
+              UPDATE user_logins
+                SET token = $1
+                  WHERE 
+                    EXISTS (
+                      SELECT 1 FROM user_logins WHERE username = $2
+                    )
+                    AND password = $3
+                    RETURNING *
+            )
+            SELECT 
+              nl.user_id AS id, 
+              u.first_name, 
+              u.last_name, 
+              nl.username, 
+              nl.token
+              FROM new_login nl
+                JOIN users u ON nl.user_id = u.id;
+        `,
+        [newToken, body.username, body.password],
+      )
+  
+      const isUsernameExistingAndPasswordMatching = !!loginQueryResponse
+      if (!isUsernameExistingAndPasswordMatching) {
+        res.status(404).json({
+          message: 'Username and password does not match!',
+        }) 
+        next();
+        return;
+      }
+  
+      const { id, first_name, last_name, username, token } = loginQueryResponse
+      res.status(200).json({
+        data: {
+          id,
+          first_name,
+          last_name,
+          username,
+          token: 'domainexpansion',
+        },
+      })
+      next();
+      return;
+    }
+
   } catch (e) {
     console.error(e);
     res.status(500).json({
       message: 'Something went wrong!',
     });
-  }
-
-  next();
-})
-
-router.route('/api/auth/login').post((req, res, next) => {
-  const { username, password } = req.body;
-
-  const nonExistentUsername = 'panda'
-  const isUserExisting = username !== nonExistentUsername
-  
-  const isUserMatching = username === existingUser.username && password === existingUser.password  
-
-  if (!isUserExisting || !isUserMatching) {
-    res.status(404).json({
-      message: 'Username and password does not match!',
-    }) 
     next();
     return;
   }
-  
-  const { password: excluded, ...userDetails } = existingUser;
-  res.status(200).json({
+})
+
+router.route('/api/auth/:id').post(async (req, res, next) => {
+  const { headers, params } = req;
+
+  const isTokenExisting = !!headers.token;
+  if (!isTokenExisting) {
+    res.status(401).json({
+      message: 'Unauthorized!',
+    });
+    next();
+    return;
+  }
+
+  if (!db) {
+    res.status(500).json({
+      message: 'Something went wrong!',
+    });
+    next();
+    return;
+  }
+
+  try {
+    const updateUserLoginQueryResponse = await db.oneOrNone(
+      `
+        UPDATE user_logins
+          SET token = NULL
+            WHERE token = $1 AND user_id = $2
+              RETURNING user_id
+      `,
+      [headers.token, params.id]
+    )
+
+    const isUserLoggedOut = !!updateUserLoginQueryResponse
+
+    if (!isUserLoggedOut) {
+      res.status(400).json({})
+      next();
+      return;
+    }
+ 
+    if (isUserLoggedOut) {
+      res.status(205).json({});
+      next();
+      return;
+    }
+  } catch(e) {
+    console.error(e);
+    res.status(500).json({
+      message: 'Something went wrong!',
+    })
+    next();
+    return;
+  }
+})
+
+// Posts
+router.route('/api/posts/:user_id').post((req, res, next) => {
+  const { body: { content }, params: { user_id }, headers: { token } } = req
+
+  const isTokenExisting = !!token
+  if (!isTokenExisting) {
+    res.status(401).json({
+      message: 'Unauthorized post creation!',
+    })
+    next();
+    return;
+  }
+
+  const isMalformedRequestBody = !content
+  if (isMalformedRequestBody) {
+    res.status(400).json({
+      message: 'Malformed request!',
+    })
+    next();
+    return;
+  }
+
+  res.status(201).json({
     data: {
-      ...userDetails,
-      token: 'domainexpansion',
-    },
+      id: Math.floor(Math.random()),
+      content,
+    }
   })
   next();
 })
 
-router.route('/api/auth/logout').post((req, res, next) => {
-  const { headers: { token }, body: { username } } = req
-
-  const isTokenExisting = !!token
-  const isUsernameExisting = !!username
-  if (!isTokenExisting || !isUsernameExisting) {
-    res.sendStatus(400);
-    next();
-    return;
-  }
-
-  res.sendStatus(205);
-  next();
-})
-
-// Posts
 router.route('/api/posts').get((req, res, next) => {
   const { headers: { token } } = req
 
@@ -329,35 +487,7 @@ router.route('/api/posts/:user_id').get((req, res, next) => {
   next();
 })
 
-router.route('/api/posts/:user_id').post((req, res, next) => {
-  const { body: { content }, params: { user_id }, headers: { token } } = req
 
-  const isTokenExisting = !!token
-  if (!isTokenExisting) {
-    res.status(401).json({
-      message: 'Unauthorized post creation!',
-    })
-    next();
-    return;
-  }
-
-  const isMalformedRequestBody = !content
-  if (isMalformedRequestBody) {
-    res.status(400).json({
-      message: 'Malformed request!',
-    })
-    next();
-    return;
-  }
-
-  res.status(201).json({
-    data: {
-      id: Math.floor(Math.random()),
-      content,
-    }
-  })
-  next();
-})
 
 router.route('/api/posts/:user_id').patch((req, res, next) => {
   const { 
@@ -413,12 +543,18 @@ const server = app.listen(port, async () => {
       })
     };
 
+    process.on('SIGINT', () => resetDB(db));
+    process.on('SIGTERM', () => resetDB(db));
+    process.on('SIGQUIT', () => resetDB(db));
+
     console.info(`[server]: Server running at http://localhost:${port}/api`)
   } catch(error) {
     console.error('[server]: Error opening server connection');
     return;
   }  
 });
+
+
 
 // TODO:
 // 1. Research on middleware in terms of distinguishing routes that needs to be authorized / with token, and those that are public

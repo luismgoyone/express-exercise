@@ -90,6 +90,20 @@ const initializeTables = async () => {
   }
 }
 
+const resetDB = async (db: null | IDatabase<any>) => {
+  try {
+    if (db) {
+      await db.none('DROP TABLE IF EXISTS users, user_logins, posts CASCADE');
+    }
+
+    process.exit(0);
+  } catch (error) {
+    console.error('Error occurred during cleanup:', error);
+    process.exit(1);
+  }
+}
+
 export {
   initializeDB,
+  resetDB,
 }

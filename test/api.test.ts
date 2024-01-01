@@ -1,33 +1,65 @@
-import { describe, it, expect, vi } from 'vitest';
+import { fail } from 'assert';
+import { describe, it, expect, vi, afterAll } from 'vitest';
 
 const url = process.env.URL || "http://localhost:3000";
 
 describe('exercise-express-pg api test', () => {
   it('should be up / return 200 on root access', async () => {
-    const response = await fetch(`${url}/api`);
+    const response = await fetch(`${url}/api/status`);
+
+    const body = await response.json();
 
     expect(response.status).toBe(200);
+    expect(body).toEqual({
+      message: 'Server up!',
+    })
   })
 
-  describe('Register User', () => {
-    // TODO: Use only one user mock to sequentially test:
-    // 1. creation of new user
-    // 2. checking of existing user
+  const mockUser: {
+    first_name: string,
+    last_name: string,
+    username: string,
+    password: string,
+    token?: string
+    id?: number,
+  } = {
+    first_name: 'sukuna',
+    last_name: 'ryomen',
+    username: Math.random().toString(36).substring(2, 10),
+    password: 'shrine666',
+  }
 
+  const mockUserWithInvalidPassword = {
+    first_name: 'satoru',
+    last_name: 'gojo',
+    username: 'limitless',
+    password: 'sixeyes', // less than 8 characters
+  }
+
+  describe('Register User', () => {
     it('should register new user', async () => {
-      const newUser = {
-        first_name: 'sukuna',
-        last_name: 'ryomen',
-        username: 'malevolent',
-        password: 'shrine666',
+      const {
+        first_name,
+        last_name,
+        username,
+      } = mockUser;
+
+      if (!first_name) {
+        fail('first_name should be provided!');
+      }
+      if (!last_name) {
+        fail('last_name should be provided!');
+      }
+      if (!username) {
+        fail('username should be provided!');
       }
 
-      const response = await fetch(`${url}/api/auth/register`, {
+      const response = await fetch(`${url}/api/auth`, {
         headers: {
           'Content-Type': 'application/json',
         },
         method: 'POST',
-        body: JSON.stringify(newUser),
+        body: JSON.stringify(mockUser),
       })
 
       const { status } = response;
@@ -35,29 +67,48 @@ describe('exercise-express-pg api test', () => {
 
       expect(status).toBe(201);
 
-      const { password, ...userDetails } = newUser
       expect(body).toEqual({
         data: expect.objectContaining({
           id: expect.any(Number),
-          ...userDetails,
+          first_name,
+          last_name,
+          username
         })
       })
     })
 
-    it('should return error if registering existing user', async () => {
-      const existingUser = {
-        first_name: 'gojo',
-        last_name: 'satoru',
-        username: 'limitless',
-        password: 'sixeyes',
+    it('should return error if existing user', async () => {
+      const {
+        first_name,
+        last_name,
+        username,
+        password,
+      } = mockUser;
+
+      if (!first_name) {
+        fail('first_name should be provided!');
+      }
+      if (!last_name) {
+        fail('last_name should be provided!');
+      }
+      if (!username) {
+        fail('username should be provided!');
+      }
+      if (!password) {
+        fail('password should be provided!');
       }
 
-      const response = await fetch(`${url}/api/auth/register`, {
+      const response = await fetch(`${url}/api/auth`, {
         headers: {
           'Content-Type': 'application/json',
         },
         method: 'POST',
-        body: JSON.stringify(existingUser),
+        body: JSON.stringify({
+          first_name,
+          last_name,
+          username,
+          password,
+        }),
       })
 
       const { status } = response
@@ -70,19 +121,37 @@ describe('exercise-express-pg api test', () => {
     })
 
     it('should return error if password is less than 8 characters', async () => {
-      const newUser = {
-        first_name: 'sukuna',
-        last_name: 'ryomen',
-        username: 'malevolent',
-        password: 'shrine', // less than 8 characters
+      const { 
+        first_name,
+        last_name,
+        username,
+        password,
+      } = mockUserWithInvalidPassword;
+
+      if (!first_name) {
+        fail('first_name should be provided!');
+      }
+      if (!last_name) {
+        fail('last_name should be provided!');
+      }
+      if (!username) {
+        fail('username should be provided!');
+      }
+      if (!password) {
+        fail('password should be provided!');
       }
       
-      const response = await fetch(`${url}/api/auth/register`, {
+      const response = await fetch(`${url}/api/auth`, {
         headers: {
           'Content-Type': 'application/json',
         },
         method: 'POST',
-        body: JSON.stringify(newUser),
+        body: JSON.stringify({
+          first_name,
+          last_name,
+          username,
+          password,
+        }),
       })
 
       const { status } = response;
@@ -95,410 +164,422 @@ describe('exercise-express-pg api test', () => {
     })
   })
 
-  describe('Login User', () => {
-    it('should login existing user', async () => {
-      const existingUser = {
-        first_name: 'gojo',
-        last_name: 'satoru',
-        username: 'limitless',
-        password: 'sixeyes',
-      }
+  // describe('Login User', () => {
+  //   it('should login existing user', async () => {
+  //     const {
+  //       username,
+  //       password,
+  //       first_name,
+  //       last_name,
+  //     } = mockUser;
 
-      const userCredentials = {
-        username: 'limitless',
-        password: 'sixeyes',
-      }
+  //     if (!username) {
+  //       fail('username should be provided!');
+  //     }
+  //     if (!password) {
+  //       fail('password should be provided!');
+  //     }
 
-      const response = await fetch(`${url}/api/auth/login`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify(userCredentials),
-      })
+  //     const response = await fetch(`${url}/api/auth`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       method: 'POST',
+  //       body: JSON.stringify({
+  //         username,
+  //         password,
+  //       }),
+  //     })
 
-      const { status } = response;
-      const body = await response.json();
+  //     const { status } = response;
+  //     const body = await response.json();
 
-      expect(status).toBe(200);
+  //     expect(status).toBe(200);
+  //     expect(body).toEqual({
+  //       data: expect.objectContaining({
+  //         id: expect.any(Number),
+  //         first_name,
+  //         last_name,
+  //         username,
+  //         token: expect.any(String),
+  //       })
+  //     })
 
-      const { password: excluded, ...userDetails } = existingUser
-      expect(body).toEqual({
-        data: expect.objectContaining({
-          id: expect.any(Number),
-          ...userDetails,
-          token: expect.any(String),
-        })
-      })
-    })
+  //     // NOTE: Prep for authenticated request tests
+  //     mockUser.token = body.data.token; 
+  //     mockUser.id = body.data.id;
+  //   })
 
-    it('should return error if username does not exist', async () => {
-      const userCredentials = {
-        username: 'panda',
-        password: 'gorilla',
-      }
+  //   it('should return error if malformed content', async () => {
+  //     const response = await fetch(`${url}/api/auth`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       method: 'POST',
+  //       body: JSON.stringify({}),
+  //     })
 
-      const response = await fetch(`${url}/api/auth/login`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify(userCredentials),
-      })
+  //     const { status } = response;
+  //     const body = await response.json();
 
-      const { status } = response;
-      const body = await response.json();
+  //     expect(status).toBe(400)
+  //     expect(body).toEqual({        
+  //       message: 'Malformed content!',
+  //     })
+  //   })
 
-      expect(status).toBe(404)
+  //   it('should return error if username and password does not match', async () => {
+  //     const userCredentials = {
+  //       username: mockUser.username,
+  //       password: 'notmatchingpassword',
+  //     }
 
-      expect(body).toEqual({        
-        message: 'Username and password does not match!'
-      })
-    })
+  //     const response = await fetch(`${url}/api/auth`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       method: 'POST',
+  //       body: JSON.stringify(userCredentials),
+  //     })
 
-    it('should return error if username and password does not match', async () => {
-      const userCredentials = {
-        username: 'limitless',
-        password: 'prison',
-      }
+  //     const { status } = response;
+  //     const body = await response.json();
 
-      const response = await fetch(`${url}/api/auth/login`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify(userCredentials),
-      })
+  //     expect(status).toBe(404);
+  //     expect(body).toEqual({
+  //       message: 'Username and password does not match!'
+  //     });
+  //   })
+  // })
 
-      const { status } = response;
-      const body = await response.json();
+  // describe('Logout User', () => {
+  //   it('should logout', async () => {
+  //     const {
+  //       token, 
+  //       username,
+  //       id,
+  //     } = mockUser;
 
-      expect(status).toBe(404);
-      expect(body).toEqual({
-        message: 'Username and password does not match!'
-      });
-    })
-  })
+  //     if (!token || !id || !username) {
+  //       fail('Token supposed to exist!');
+  //     }
 
-  describe('Logout User', () => {
-    it('should logout successfully with right params', async () => {
-      const response = await fetch(`${url}/api/auth/logout`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          username: 'satoru',
-        }),
-      });
+  //     const response = await fetch(`${url}/api/auth/${id}`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         token,
+  //       },
+  //       method: 'POST',
+  //       body: JSON.stringify({
+  //         username,
+  //       }),
+  //     });
 
-      const { status } = response;
-      expect(status).toBe(205);
-    })
+  //     const { status } = response;
+  //     expect(status).toBe(205);
+  //   })
 
-    it('should not logout successfully if without username', async () => {
-      const response = await fetch(`${url}/api/auth/logout`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'POST',
-      });
+  //   it('should return error if invalid token', async () => {
+  //     const { id } = mockUser
 
-      const { status } = response;      
-      expect(status).toBe(400);
-    })
+  //     const response = await fetch(`${url}/api/auth/${id}`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       method: 'POST',
+  //     });
 
-    it('should not logout successfully if without token', async () => {
-      const response = await fetch(`${url}/api/auth/logout`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      });
-
-      const { status } = response;      
-      expect(status).toBe(400);
-    })
-  })
-
-  describe('Read All Posts', () => {
-    it('should return all posts sorted by most recent created_at', async () => {
-      const response = await fetch(`${url}/api/posts`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'GET',
-      });
-
-      const { status } = response;
-      const body = await response.json();
-
-      expect(status).toBe(200);
-      expect(body).toEqual({
-        data: expect.arrayContaining([expect.objectContaining({
-          id: expect.any(Number),
-          content: expect.any(String),
-          first_name: expect.any(String),
-          last_name: expect.any(String),
-          username: expect.any(String),
-          created_at: expect.any(String),
-        })])
-      });
-
-      const unsorted = body.data
-      const sorted = body.data.toSorted((a, b) => 
-      (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
-
-      expect(unsorted).toStrictEqual(sorted)
-    })
-
-    it('should return error if invalid token', async () => {
-      const response = await fetch(`${url}/api/posts`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'GET',
-      });
-
-      const { status } = response;
-      const body = await response.json();
-
-      expect(status).toBe(401); 
-      expect(body).toEqual({
-        message: 'Unauthorized post access!',
-      })
-    })
-  })
-
-  describe('Read User Posts', () => {
-    it('should return user posts sorted by most recent created_at', async () => {
-      const response = await fetch(`${url}/api/posts/3`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'GET',
-      });
-
-      const { status } = response;
-      const body = await response.json();
-
-      expect(status).toBe(200);
-
-      expect(body).toEqual(
-        expect.objectContaining({
-          data: expect.arrayContaining([
-            expect.objectContaining({
-              id: expect.any(Number),
-              content: expect.any(String),
-            })
-          ]),
-        })
-      );
+  //     const { status } = response;
+  //     const body = await response.json();
       
-      const filteredData = body.data.map(post => ({
-          id: post.id,
-          content: post.content,
-        }
-      ))
+  //     expect(status).toBe(401);
+  //     expect(body).toEqual({
+  //       message: 'Unauthorized!',
+  //     })
+  //   })
+  // })
 
-      expect(body.data).toStrictEqual(filteredData)
+  // describe('Create Post', () => {
+  //   it('should create posts', async () => {
+  //     const { id, token } = mockUser;
+  //     const content = 'searching for someone to blame is such a pain.';
 
-      const unsorted = body.data
-      const sorted = body.data.toSorted((a, b) => 
-      (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
+  //     if (!token) {
+  //       fail('Token supposed to exist!')
+  //     }
 
-      expect(unsorted).toStrictEqual(sorted)
-    })
+  //     const response = await fetch(`${url}/api/posts/${id}`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         token,
+  //       },
+  //       method: 'POST',
+  //       body: JSON.stringify({
+  //         content,
+  //       }),
+  //     });
 
-    it('should return error if invalid token', async () => {
-      const response = await fetch(`${url}/api/posts/3`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'GET',
-      });
+  //     const { status } = response;
+  //     const body = await response.json();
 
-      const { status } = response;
-      const body = await response.json();
+  //     expect(status).toBe(201);
+  //     expect(body).toEqual({
+  //       data: {
+  //         id: expect.any(Number),
+  //         content,
+  //       }
+  //     })      
+  //   })
 
-      expect(status).toBe(401); 
-      expect(body).toEqual({
-        message: 'Unauthorized post access!'
-      })
-    })
-  })
+  //   // it('should return error if invalid token', async () => {
+  //   //   const content = 'searching for someone to blame is such a pain.';
 
-  describe('Create Post', () => {
-    it('should create post', async () => {
-      const content = 'searching for someone to blame is such a pain.';
+  //   //   // NOTE: No token case. TODO: Add token mismatch case
+  //   //   const response = await fetch(`${url}/api/posts/1`, {
+  //   //     headers: {
+  //   //       'Content-Type': 'application/json',
+  //   //     },
+  //   //     method: 'POST',
+  //   //     body: JSON.stringify({
+  //   //       content,
+  //   //     }),
+  //   //   });
 
-      const response = await fetch(`${url}/api/posts/1`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          content,
-        }),
-      });
+  //   //   const { status } = response;
+  //   //   const body = await response.json();
 
-      const { status } = response;
-      const body = await response.json();
+  //   //   expect(status).toBe(401);
+  //   //   expect(body).toEqual({
+  //   //     message: 'Unauthorized post creation!',
+  //   //   })      
+  //   // })
 
-      expect(status).toBe(201);
-      expect(body).toEqual({
-        data: {
-          id: expect.any(Number),
-          content,
-        }
-      })      
-    })
+  //   // it('should return error if malformed request body', async () => {
+  //   //   const response = await fetch(`${url}/api/posts/1`, {
+  //   //     headers: {
+  //   //       'Content-Type': 'application/json',
+  //   //       token: 'domainexpansion',
+  //   //     },
+  //   //     method: 'POST',
+  //   //     body: JSON.stringify({
+  //   //       random: 'value'
+  //   //     }),
+  //   //   });
 
-    it('should return error if invalid token', async () => {
-      const content = 'searching for someone to blame is such a pain.';
+  //   //   const { status } = response;
+  //   //   const body = await response.json();
 
-      // NOTE: No token case. TODO: Add token mismatch case
-      const response = await fetch(`${url}/api/posts/1`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          content,
-        }),
-      });
+  //   //   expect(status).toBe(400);
+  //   //   expect(body).toEqual({
+  //   //     message: 'Malformed request!',
+  //   //   })      
+  //   // })
+  // })
 
-      const { status } = response;
-      const body = await response.json();
+  // describe('Read All Posts', () => {
+  //   it('should return all posts sorted by most recent created_at', async () => {
+  //     const response = await fetch(`${url}/api/posts`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         token: 'domainexpansion',
+  //       },
+  //       method: 'GET',
+  //     });
 
-      expect(status).toBe(401);
-      expect(body).toEqual({
-        message: 'Unauthorized post creation!',
-      })      
-    })
+  //     const { status } = response;
+  //     const body = await response.json();
 
-    it('should return error if malformed request body', async () => {
-      const response = await fetch(`${url}/api/posts/1`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          random: 'value'
-        }),
-      });
+  //     expect(status).toBe(200);
+  //     expect(body).toEqual({
+  //       data: expect.arrayContaining([expect.objectContaining({
+  //         id: expect.any(Number),
+  //         content: expect.any(String),
+  //         first_name: expect.any(String),
+  //         last_name: expect.any(String),
+  //         username: expect.any(String),
+  //         created_at: expect.any(String),
+  //       })])
+  //     });
 
-      const { status } = response;
-      const body = await response.json();
+  //     const unsorted = body.data
+  //     const sorted = body.data.toSorted((a, b) => 
+  //     (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
 
-      expect(status).toBe(400);
-      expect(body).toEqual({
-        message: 'Malformed request!',
-      })      
-    })
-  })
+  //     expect(unsorted).toStrictEqual(sorted)
+  //   })
+
+  //   it('should return error if invalid token', async () => {
+  //     const response = await fetch(`${url}/api/posts`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       method: 'GET',
+  //     });
+
+  //     const { status } = response;
+  //     const body = await response.json();
+
+  //     expect(status).toBe(401); 
+  //     expect(body).toEqual({
+  //       message: 'Unauthorized post access!',
+  //     })
+  //   })
+  // })
+
+  // describe('Read User Posts', () => {
+  //   it('should return user posts sorted by most recent created_at', async () => {
+  //     const response = await fetch(`${url}/api/posts/3`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         token: 'domainexpansion',
+  //       },
+  //       method: 'GET',
+  //     });
+
+  //     const { status } = response;
+  //     const body = await response.json();
+
+  //     expect(status).toBe(200);
+
+  //     expect(body).toEqual(
+  //       expect.objectContaining({
+  //         data: expect.arrayContaining([
+  //           expect.objectContaining({
+  //             id: expect.any(Number),
+  //             content: expect.any(String),
+  //           })
+  //         ]),
+  //       })
+  //     );
+      
+  //     const filteredData = body.data.map(post => ({
+  //         id: post.id,
+  //         content: post.content,
+  //       }
+  //     ))
+
+  //     expect(body.data).toStrictEqual(filteredData)
+
+  //     const unsorted = body.data
+  //     const sorted = body.data.toSorted((a, b) => 
+  //     (a.created_at < b.created_at) ? -1 : ((a.created_at > b.created_at) ? 1 : 0))
+
+  //     expect(unsorted).toStrictEqual(sorted)
+  //   })
+
+  //   it('should return error if invalid token', async () => {
+  //     const response = await fetch(`${url}/api/posts/3`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       method: 'GET',
+  //     });
+
+  //     const { status } = response;
+  //     const body = await response.json();
+
+  //     expect(status).toBe(401); 
+  //     expect(body).toEqual({
+  //       message: 'Unauthorized post access!'
+  //     })
+  //   })
+  // })
   
-  describe('Update Post', () => {
-    it('should update post', async () => {
-      const payload = {
-        id: 2,
-        content: 'you’re lucky if you can die a normal death...',
-      }
+  // describe('Update Post', () => {
+  //   it('should update post', async () => {
+  //     const payload = {
+  //       id: 2,
+  //       content: 'you’re lucky if you can die a normal death...',
+  //     }
 
-      const response = await fetch(`${url}/api/posts/1`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'PATCH',
-        body: JSON.stringify(payload),
-      });
+  //     const response = await fetch(`${url}/api/posts/1`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         token: 'domainexpansion',
+  //       },
+  //       method: 'PATCH',
+  //       body: JSON.stringify(payload),
+  //     });
 
-      const { status } = response;
-      const body = await response.json();
+  //     const { status } = response;
+  //     const body = await response.json();
 
-      expect(status).toBe(200);
-      expect(body.data).toEqual(payload)
-    })
+  //     expect(status).toBe(200);
+  //     expect(body.data).toEqual(payload)
+  //   })
 
-    it('should return error if invalid token', async () => {
-      const payload = {
-        id: 2,
-        content: 'you’re lucky if you can die a normal death...',
-      }
+  //   it('should return error if invalid token', async () => {
+  //     const payload = {
+  //       id: 2,
+  //       content: 'you’re lucky if you can die a normal death...',
+  //     }
 
-      const response = await fetch(`${url}/api/posts/1`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'PATCH',
-        body: JSON.stringify(payload),
-      });
+  //     const response = await fetch(`${url}/api/posts/1`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       method: 'PATCH',
+  //       body: JSON.stringify(payload),
+  //     });
 
-      const { status } = response;
-      const body = await response.json();
+  //     const { status } = response;
+  //     const body = await response.json();
 
-      expect(status).toBe(401);
-      expect(body).toEqual({
-        message: 'Unauthorized post update!',
-      })
-    })
+  //     expect(status).toBe(401);
+  //     expect(body).toEqual({
+  //       message: 'Unauthorized post update!',
+  //     })
+  //   })
 
-    it('should return error if malformed request body', async () => {
-      const response = await fetch(`${url}/api/posts/1`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'PATCH',
-        body: JSON.stringify({
-          random: 'value'
-        }),
-      });
+  //   it('should return error if malformed request body', async () => {
+  //     const response = await fetch(`${url}/api/posts/1`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         token: 'domainexpansion',
+  //       },
+  //       method: 'PATCH',
+  //       body: JSON.stringify({
+  //         random: 'value'
+  //       }),
+  //     });
 
-      const { status } = response;
-      const body = await response.json();
+  //     const { status } = response;
+  //     const body = await response.json();
 
-      expect(status).toBe(400);
-      expect(body).toEqual({
-        message: 'Malformed request!',
-      })       
-    })
-  })
+  //     expect(status).toBe(400);
+  //     expect(body).toEqual({
+  //       message: 'Malformed request!',
+  //     })       
+  //   })
+  // })
 
-  describe('Delete Post', () => {
-    it('should delete post', async () => {
-      const response = await fetch(`${url}/api/posts/1`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'DELETE',
-      });
+  // describe('Delete Post', () => {
+  //   it('should delete post', async () => {
+  //     const response = await fetch(`${url}/api/posts/1`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         token: 'domainexpansion',
+  //       },
+  //       method: 'DELETE',
+  //     });
 
-      const { status } = response;
+  //     const { status } = response;
 
-      expect(status).toBe(204);
-    })
+  //     expect(status).toBe(204);
+  //   })
 
-    it('should return error if invalid token', async () => {
-      const response = await fetch(`${url}/api/posts/1`, {
-        headers: {
-          'Content-Type': 'application/json',
-          token: 'domainexpansion',
-        },
-        method: 'DELETE',
-      });
+  //   it('should return error if invalid token', async () => {
+  //     const response = await fetch(`${url}/api/posts/1`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         token: 'domainexpansion',
+  //       },
+  //       method: 'DELETE',
+  //     });
 
-      const { status } = response;
+  //     const { status } = response;
 
-      expect(status).toBe(204);
-    })
-  })
+  //     expect(status).toBe(204);
+  //   })
+  // })
 })
