@@ -6,7 +6,6 @@ const registerUser = async (req, res) => {
   const { first_name, last_name, username, password } = req.body;
 
   try {
-
     const usernameRow = await pool.query(queries.validateUsername, [username]);
 
     if (usernameRow.rows.length) {
