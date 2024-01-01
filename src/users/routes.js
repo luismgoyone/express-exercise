@@ -9,7 +9,7 @@ router.post('/login', controller.loginUser);
 router.post('/logout', controller.logoutUser);
 router.get('/posts', controller.getPosts);
 router.get('/:id/posts', controller.getUserPosts);
-router.post('/add-post', controller.createPost);
+router.post('/:id/posts', controller.createPost);
 router.post('/update-post', controller.updatePost);
 router.delete('/delete-post/:id', controller.deletePost);
 
