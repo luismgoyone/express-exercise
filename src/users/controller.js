@@ -130,7 +130,7 @@ const getPosts = async (req, res) => {
 
 const getUserPosts = async (req, res) => {
   const { token } = req.headers;
-  const { user_id } = req.body;
+  const { id } = req.params;
 
   try {
     const validatedToken = await pool.query(queries.validateToken, [token]);
@@ -141,7 +141,7 @@ const getUserPosts = async (req, res) => {
         .json({ success: false, message: 'Invalid token.' });
     }
 
-    const userPosts = await pool.query(queries.getUserPosts, [user_id]);
+    const userPosts = await pool.query(queries.getUserPosts, [id]);
 
     res.status(201).json({ data: userPosts.rows });
   } catch (error) {
