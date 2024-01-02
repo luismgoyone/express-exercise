@@ -42,6 +42,7 @@ func main() {
 	router := gin.Default()
 
 	router.POST("/register", createUserAccount)
+	router.PUT("/login", loginUserAccount)
 	router.Run("localhost:8080")
 }
 
@@ -127,4 +128,62 @@ func createUserAccount(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, createdUser)
+}
+
+// PUT
+
+func loginUserAccount(c *gin.Context) {
+	type LoginUserAccountBody struct {
+		Password string `json:"password"`
+		Username string `json:"username"`
+	}
+
+	type LoginUserAccountReturn struct {
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Password  string `json:"password"`
+		Username  string `json:"username"`
+		Token     string `json:"token"`
+	}
+
+	var body LoginUserAccountBody
+	var errs []error
+
+	err := c.BindJSON(&body)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusBadRequest, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	err = verifyUserLogin(body.Username, body.Password)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusBadRequest, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	err = addToken(body.Username)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusBadRequest, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	loggedInUserAccount, err := getUserAccountByUsername(body.Username)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusInternalServerError, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	loginUserAccountReturn := LoginUserAccountReturn{
+		FirstName: loggedInUserAccount.first_name,
+		LastName:  loggedInUserAccount.last_name,
+		Password:  loggedInUserAccount.password,
+		Username:  loggedInUserAccount.username,
+		Token:     loggedInUserAccount.token,
+	}
+
+	c.IndentedJSON(http.StatusOK, loginUserAccountReturn)
 }
