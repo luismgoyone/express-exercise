@@ -64,21 +64,21 @@ func jsonifyErrors(errors []error) ErrorJson {
 // POST
 
 func createUserAccount(c *gin.Context) {
-	type PostUserBody struct {
+	type CreateUserAccountBody struct {
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
 		Password  string `json:"password"`
 		Username  string `json:"username"`
 	}
 
-	type PostUserReturn struct {
+	type CreateUserAccountReturn struct {
 		ID        int    `json:"id"`
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
 		Username  string `json:"username"`
 	}
 
-	var body PostUserBody
+	var body CreateUserAccountBody
 	var errs []error
 
 	err := c.BindJSON(&body)
@@ -119,7 +119,7 @@ func createUserAccount(c *gin.Context) {
 		panic(err)
 	}
 
-	createdUser := PostUserReturn{
+	createdUser := CreateUserAccountReturn{
 		ID:        newUserAccount.id,
 		FirstName: newUserAccount.first_name,
 		LastName:  newUserAccount.last_name,
