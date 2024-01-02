@@ -44,6 +44,47 @@ func checkUsernameDuplicates(newUsername string) error {
 	return errMsg
 }
 
+func verifyUserLogin(username string, password string) error {
+	var userLogin UserLogin
+	sqlStatement := `
+		SELECT password
+		FROM user_logins
+		WHERE username=$1
+	`
+	row := db.QueryRow(sqlStatement, username)
+	err := row.Scan(&userLogin.password)
+	noResultsError := "sql: no rows in result set"
+
+	if err != nil && err.Error() == noResultsError {
+		return fmt.Errorf("No account with the username '%v' found", username)
+	}
+	if err != nil {
+		return fmt.Errorf("userLogin: %v", err)
+	}
+	if password != userLogin.password {
+		return fmt.Errorf("Username or password is incorrect")
+	}
+
+	return nil
+}
+
 // UPDATE
+
+func addToken(username string) error {
+	var userId int
+	newToken := generateSecureToken(64)
+	sqlStatement := `
+		UPDATE user_logins
+		SET token=$1
+		WHERE username=$2
+		RETURNING user_id
+	`
+	row := db.QueryRow(sqlStatement, newToken, username)
+	err := row.Scan(&userId)
+	if err != nil {
+		return fmt.Errorf("addToken: %v", err)
+	}
+	return err
+}
 
 // DELETE
