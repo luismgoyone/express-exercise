@@ -10,8 +10,9 @@ const app = express();
 
 app.use(json());
 
-// // test db connection
-// //-------------------------------------------------------------------
+//-------------------------------------------------------------------
+// [test db connection]
+
 // pool.on("error", (err) => {
 //   console.error("Unexpected error on idle client", err);
 //   process.exit(-1);
@@ -29,7 +30,7 @@ app.use(json());
 //   // Release the client back to the pool
 //   done();
 // });
-// //-------------------------------------------------------------------
+//-------------------------------------------------------------------
 
 // try endpoints implementation here...
 app.get("/", (req: Request, res: Response) => {

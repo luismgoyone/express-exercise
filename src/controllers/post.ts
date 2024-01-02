@@ -4,8 +4,8 @@ import { getUserLoginToken } from "../utils/getUserLoginToken";
 
 const createPost = async (req: Request, res: Response) => {
   try {
-    const authorizationHeader = req.headers.authorization; // "Bearer <token>"
-    const payloadToken = authorizationHeader?.split(" ")[1]; // "<token>"
+    const authorizationHeader = req.headers.authorization;
+    const payloadToken = authorizationHeader?.split(" ")[1];
 
     const userLoginToken = await getUserLoginToken(payloadToken);
 
@@ -29,8 +29,8 @@ const createPost = async (req: Request, res: Response) => {
 
 const updatePost = async (req: Request, res: Response) => {
   try {
-    const authorizationHeader = req.headers.authorization; // "Bearer <token>"
-    const payloadToken = authorizationHeader?.split(" ")[1]; // "<token>"
+    const authorizationHeader = req.headers.authorization;
+    const payloadToken = authorizationHeader?.split(" ")[1];
 
     const userLoginToken = await getUserLoginToken(payloadToken);
     const userId = userLoginToken.rows[0].user_id;
@@ -71,8 +71,8 @@ const updatePost = async (req: Request, res: Response) => {
 
 const deletePost = async (req: Request | any, res: Response) => {
   try {
-    const authorizationHeader = req.headers.authorization; // "Bearer <token>"
-    const payloadToken = authorizationHeader?.split(" ")[1]; // "<token>"
+    const authorizationHeader = req.headers.authorization;
+    const payloadToken = authorizationHeader?.split(" ")[1];
 
     const userLoginToken = await getUserLoginToken(payloadToken);
     const userId = userLoginToken.rows[0].user_id;
@@ -112,8 +112,8 @@ const deletePost = async (req: Request | any, res: Response) => {
 
 const getUserPosts = async (req: Request, res: Response) => {
   try {
-    const authorizationHeader = req.headers.authorization; // "Bearer <token>"
-    const payloadToken = authorizationHeader?.split(" ")[1]; // "<token>"
+    const authorizationHeader = req.headers.authorization;
+    const payloadToken = authorizationHeader?.split(" ")[1];
 
     const userLoginToken = await getUserLoginToken(payloadToken);
     const userId = userLoginToken.rows[0].user_id;

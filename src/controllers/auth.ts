@@ -4,7 +4,6 @@ import { secretKey } from "../constant/jwt_secret_key";
 import jwt from "jsonwebtoken";
 import { getUserLoginToken } from "../utils/getUserLoginToken";
 
-// Register user
 const registerUser = async (req: Request, res: Response) => {
   try {
     const { first_name, last_name, username, password } = req.body;
@@ -20,7 +19,6 @@ const registerUser = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Username already exists." });
     }
 
-    // Validate password length
     if (password.length < 8) {
       return res
         .status(400)
