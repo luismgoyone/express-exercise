@@ -1,28 +1,17 @@
 import express from 'express';
-import expressOpenApi, { SPEC_OUTPUT_FILE_BEHAVIOR } from 'express-oas-generator';
 import { initializeDB, resetDB } from './db';
 import { 
   IDatabase, 
   // ParameterizedQuery 
 } from 'pg-promise';
+// Docs
+import expressOpenApi, { SPEC_OUTPUT_FILE_BEHAVIOR } from 'express-oas-generator';
+import fs from 'fs'
+import { LOGIN_USER, REGISTER_USER } from './queries';
+const dbmlSVG = fs.readFileSync('./docs/dbml.svg');
 
-// NOTE: Mock
-const nonExistentUser = {
-  id: 666,
-  first_name: 'sukuna',
-  last_name: 'ryomen',
-  username: 'malevolent',
-  password: 'shrine666'
-}
 
-const existingUser = {
-  id: 1,
-  first_name: 'satoru',
-  last_name: 'gojo',
-  username: 'sixeyes',
-  password: 'limitless',
-}
-
+// Initialization
 const port = process.env.PORT;
 
 const app = express();
@@ -52,7 +41,14 @@ expressOpenApi.handleResponses(app, {
   specOutputPath: 'docs/api.json',
   specOutputFileBehavior: SPEC_OUTPUT_FILE_BEHAVIOR.RECREATE,
   swaggerDocumentOptions: null,
+  swaggerUiServePath: 'docs',
 });
+
+app.get('/docs/dbml', (req, res, next) => {
+  res.set('Content-Type', 'image/svg+xml');
+  res.send(dbmlSVG);
+  next();
+})
 
 app.use(express.json());
 
@@ -138,30 +134,7 @@ router.route('/api/auth').post(async (req, res, next) => {
       // }
   
       const registerUserQueryResponse = await db.oneOrNone(
-        `
-          WITH 
-            new_user AS (
-              INSERT INTO users (first_name, last_name) 
-                SELECT $1, $2
-                  WHERE NOT EXISTS (
-                    SELECT 1 
-                      FROM user_logins 
-                        WHERE username = $3    
-                  )
-                    RETURNING id, first_name, last_name
-            ), 
-            new_login AS (
-              INSERT INTO user_logins (user_id, username, password)
-                SELECT (SELECT id FROM new_user), $3, $4
-                  WHERE NOT EXISTS (
-                    SELECT 1 
-                      FROM user_logins 
-                        WHERE username = $3    
-                  )
-                    RETURNING username
-            ) 
-            SELECT * FROM new_user CROSS JOIN new_login;
-        `,
+        REGISTER_USER,
         [body.first_name, body.last_name, body.username, body.password],
       )
 
@@ -201,38 +174,7 @@ router.route('/api/auth').post(async (req, res, next) => {
     
       // TODO: use bcrypt
       const loginQueryResponse = await db.oneOrNone(
-        // ` REVIEW: Without username check
-        //   SELECT 
-        //     ul.user_id AS id, 
-        //     u.first_name, 
-        //     u.last_name, 
-        //     ul.username, 
-        //     ul.token
-        //     FROM user_logins ul
-        //       JOIN users u ON ul.user_id = u.id
-        //         WHERE username = $1 AND password = $2;
-        // `,
-        `
-          WITH 
-            new_login AS (
-              UPDATE user_logins
-                SET token = $1
-                  WHERE 
-                    EXISTS (
-                      SELECT 1 FROM user_logins WHERE username = $2
-                    )
-                    AND password = $3
-                    RETURNING *
-            )
-            SELECT 
-              nl.user_id AS id, 
-              u.first_name, 
-              u.last_name, 
-              nl.username, 
-              nl.token
-              FROM new_login nl
-                JOIN users u ON nl.user_id = u.id;
-        `,
+        LOGIN_USER,
         [newToken, body.username, body.password],
       )
   
@@ -486,8 +428,6 @@ router.route('/api/posts/:user_id').get((req, res, next) => {
   })
   next();
 })
-
-
 
 router.route('/api/posts/:user_id').patch((req, res, next) => {
   const { 

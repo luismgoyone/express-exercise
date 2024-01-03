@@ -164,93 +164,93 @@ describe('exercise-express-pg api test', () => {
     })
   })
 
-  // describe('Login User', () => {
-  //   it('should login existing user', async () => {
-  //     const {
-  //       username,
-  //       password,
-  //       first_name,
-  //       last_name,
-  //     } = mockUser;
+  describe.skip('Login User', () => {
+    it('should login existing user', async () => {
+      const {
+        username,
+        password,
+        first_name,
+        last_name,
+      } = mockUser;
 
-  //     if (!username) {
-  //       fail('username should be provided!');
-  //     }
-  //     if (!password) {
-  //       fail('password should be provided!');
-  //     }
+      if (!username) {
+        fail('username should be provided!');
+      }
+      if (!password) {
+        fail('password should be provided!');
+      }
 
-  //     const response = await fetch(`${url}/api/auth`, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       method: 'POST',
-  //       body: JSON.stringify({
-  //         username,
-  //         password,
-  //       }),
-  //     })
+      const response = await fetch(`${url}/api/auth`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      })
 
-  //     const { status } = response;
-  //     const body = await response.json();
+      const { status } = response;
+      const body = await response.json();
 
-  //     expect(status).toBe(200);
-  //     expect(body).toEqual({
-  //       data: expect.objectContaining({
-  //         id: expect.any(Number),
-  //         first_name,
-  //         last_name,
-  //         username,
-  //         token: expect.any(String),
-  //       })
-  //     })
+      expect(status).toBe(200);
+      expect(body).toEqual({
+        data: expect.objectContaining({
+          id: expect.any(Number),
+          first_name,
+          last_name,
+          username,
+          token: expect.any(String),
+        })
+      })
 
-  //     // NOTE: Prep for authenticated request tests
-  //     mockUser.token = body.data.token; 
-  //     mockUser.id = body.data.id;
-  //   })
+      // NOTE: Prep for authenticated request tests
+      mockUser.token = body.data.token; 
+      mockUser.id = body.data.id;
+    })
 
-  //   it('should return error if malformed content', async () => {
-  //     const response = await fetch(`${url}/api/auth`, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       method: 'POST',
-  //       body: JSON.stringify({}),
-  //     })
+    it('should return error if malformed content', async () => {
+      const response = await fetch(`${url}/api/auth`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({}),
+      })
 
-  //     const { status } = response;
-  //     const body = await response.json();
+      const { status } = response;
+      const body = await response.json();
 
-  //     expect(status).toBe(400)
-  //     expect(body).toEqual({        
-  //       message: 'Malformed content!',
-  //     })
-  //   })
+      expect(status).toBe(400)
+      expect(body).toEqual({        
+        message: 'Malformed content!',
+      })
+    })
 
-  //   it('should return error if username and password does not match', async () => {
-  //     const userCredentials = {
-  //       username: mockUser.username,
-  //       password: 'notmatchingpassword',
-  //     }
+    it('should return error if username and password does not match', async () => {
+      const userCredentials = {
+        username: mockUser.username,
+        password: 'notmatchingpassword',
+      }
 
-  //     const response = await fetch(`${url}/api/auth`, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       method: 'POST',
-  //       body: JSON.stringify(userCredentials),
-  //     })
+      const response = await fetch(`${url}/api/auth`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify(userCredentials),
+      })
 
-  //     const { status } = response;
-  //     const body = await response.json();
+      const { status } = response;
+      const body = await response.json();
 
-  //     expect(status).toBe(404);
-  //     expect(body).toEqual({
-  //       message: 'Username and password does not match!'
-  //     });
-  //   })
-  // })
+      expect(status).toBe(404);
+      expect(body).toEqual({
+        message: 'Username and password does not match!'
+      });
+    })
+  })
 
   // describe('Logout User', () => {
   //   it('should logout', async () => {

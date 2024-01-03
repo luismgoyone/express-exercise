@@ -1,0 +1,24 @@
+Table "users" {
+  "id" SERIAL [pk, increment]
+  "first_name" VARCHAR(20)
+  "last_name" VARCHAR(20)
+}
+
+Table "user_logins" {
+  "user_id" INT
+  "token" TEXT
+  "last_login_at" TIMESTAMP
+  "username" VARCHAR(20)
+  "password" VARCHAR(20)
+}
+
+Table "posts" {
+  "id" SERIAL [pk, increment]
+  "user_id" INT
+  "content" TEXT
+  "created_at" TIMESTAMP
+}
+
+Ref:"users"."id" < "user_logins"."user_id"
+
+Ref:"users"."id" < "posts"."user_id"

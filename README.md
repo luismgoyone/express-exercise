@@ -43,6 +43,7 @@
 11. Endpoint naming
 12. Research on SQL Injection and other security stuff
 13. Folder structure
+14. Explore pgTap or other unit to regresstion testing for pgsql scripts.
 
 ## Route Anatomy (Express Implementation)
 ```ts

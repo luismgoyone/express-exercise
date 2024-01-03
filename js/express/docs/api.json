@@ -9,6 +9,17 @@
     "description": "Testing lang"
   },
   "paths": {
+    "/docs/dbml": {
+      "get": {
+        "summary": "/docs/dbml",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {},
+        "tags": []
+      }
+    },
     "/api/status": {
       "get": {
         "summary": "/api/status",
@@ -62,7 +73,7 @@
                 },
                 "username": {
                   "type": "string",
-                  "example": "ktocl2mv"
+                  "example": "u53evgpw"
                 },
                 "password": {
                   "type": "string",
@@ -83,7 +94,7 @@
                   "properties": {
                     "id": {
                       "type": "number",
-                      "example": 5
+                      "example": 1
                     },
                     "first_name": {
                       "type": "string",
@@ -95,7 +106,7 @@
                     },
                     "username": {
                       "type": "string",
-                      "example": "ktocl2mv"
+                      "example": "u53evgpw"
                     }
                   }
                 }
