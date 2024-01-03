@@ -6,10 +6,8 @@ const registerUser = async (req:Request, res:Response) => {
 
     try{
         const {first_name,last_name,username,password} = req.body
-
         const userValidation = await pool.query('SELECT u FROM user_logins u WHERE u.username = $1', [username]);
 
-        console.log(userValidation)
         if(userValidation.rows.length > 0){
             return res.status(400).json({error:'username exist'})
         }
@@ -29,8 +27,8 @@ const registerUser = async (req:Request, res:Response) => {
           const userId = userResult.rows[0].id;
 
           await pool.query(
-            "INSERT INTO user_logins (user_id, token, last_login_at, username, password) VALUES ($1, $2, $3, $4, $5)",
-            [userId, null, null, username, password]
+            "INSERT INTO user_logins (user_id, username, password) VALUES ($1, $2, $3)",
+            [userId, username, password]
           );
 
         res.status(201).json({ message: 'Registration successful', username });
