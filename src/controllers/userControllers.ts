@@ -18,7 +18,6 @@ const registerUser = async (req:Request, res:Response) => {
               .json({ error: 'password too short, password must be at least 8 characters' });
           }
 
-        
           const userResult = await pool.query(
             "INSERT INTO users (first_name, last_name) VALUES ($1, $2) RETURNING id, first_name, last_name",
             [first_name, last_name]
@@ -31,7 +30,7 @@ const registerUser = async (req:Request, res:Response) => {
             [userId, username, password]
           );
 
-        res.status(201).json({ message: 'Registration successful', username });
+        return res.status(201).json({ message: 'Registration successful', username });
 
     }
     catch(error){
@@ -39,11 +38,33 @@ const registerUser = async (req:Request, res:Response) => {
         return res.status(500).json({ error: 'Internal server error' });
 
     }
-}
-export { registerUser };
-// const loginUser = () => {
 
-// }
+}
+
+const loginUser = async (req:Request, res:Response) => {
+
+  const {username,password} = req.body
+
+  const loginUserResult = await pool.query(
+    "SELECT username, password FROM user_logins WHERE username = $1 AND password = $2",
+    [username, password]
+  );
+
+  if (!loginUserResult.rows.length) {
+    return res.status(400).json({ error: "Invalid username or password." });
+  }
+
+  // no token yet
+  await pool.query(
+    "UPDATE user_logins SET last_login_at = CURRENT_TIMESTAMP WHERE username = $1",
+    [username]
+  );
+
+  return res.status(201).json({ message: 'Welcome back!', username });
+
+}
+export { registerUser, loginUser };
+
 
 // const logoutUser = () => {
 
