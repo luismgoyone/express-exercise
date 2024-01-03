@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import pool from "../database";
-
+import jwt from 'jsonwebtoken';
 
 const registerUser = async (req:Request, res:Response) => {
 
@@ -43,6 +43,8 @@ const registerUser = async (req:Request, res:Response) => {
 
 const loginUser = async (req:Request, res:Response) => {
 
+  const secret = process.env.JWT_SECRET_KEY
+
   const {username,password} = req.body
 
   const loginUserResult = await pool.query(
@@ -54,10 +56,14 @@ const loginUser = async (req:Request, res:Response) => {
     return res.status(400).json({ error: "Invalid username or password." });
   }
 
-  // no token yet
+  const user = loginUserResult.rows[0]
+  const token = jwt.sign({ userId: user.id, username: user.username }, secret as string);
+
+  res.json({ token });
+  
   await pool.query(
-    "UPDATE user_logins SET last_login_at = CURRENT_TIMESTAMP WHERE username = $1",
-    [username]
+    "UPDATE user_logins SET token= $2, last_login_at = CURRENT_TIMESTAMP WHERE username = $1",
+    [username,token]
   );
 
   return res.status(201).json({ message: 'Welcome back!', username });
