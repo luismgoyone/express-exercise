@@ -1,4 +1,4 @@
-import { registerUser, loginUser } from "../controllers/userControllers"
+import { registerUser, loginUser, logoutUser } from "../controllers/userControllers"
 import { Router } from "express";
 const router = Router()
 const bodyParser = require('body-parser').json();
@@ -11,6 +11,6 @@ import {verify} from "../auth";
 	router.post("/login",bodyParser,verify, loginUser)
 
 	//logout
-	// app.post("/logout", logoutUser)
+	router.post("/logout",verify, logoutUser)
 
 module.exports = router;

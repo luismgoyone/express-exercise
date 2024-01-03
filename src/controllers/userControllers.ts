@@ -69,11 +69,35 @@ const loginUser = async (req:Request, res:Response) => {
   return res.status(201).json({ message: 'Welcome back!', username });
 
 }
-export { registerUser, loginUser };
+
+const logoutUser =async (req: Request, res: Response) => {
+  try{
+    const tokenHeader = req.headers.authorization
+    const token = tokenHeader?.slice(7, tokenHeader.length)
+  
+    const userToken = await userLogoutToken(token)
+  
+    const userId = userToken.rows[0].user_id
+  
+    await pool.query("UPDATE user_logins SET token = null WHERE user_id = $1", [
+      userId,
+    ]);
+  
+    return res.status(200).json({success: true});
+  }
+  catch(error){
+    return res.status(500).json({ error: "Error occured" });
+  }
+  
+}
+
+const userLogoutToken =async (token?:string) => {
+return await pool.query("SELECT * FROM user_logins WHERE user_logins.token = $1",[token])
+}
+
+export { registerUser, loginUser, logoutUser };
 
 
-// const logoutUser = () => {
 
-// }
 
 
