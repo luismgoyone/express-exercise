@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 require('dotenv').config();
-const port = process.env.EXPRESS_PORT || 3000;
 
 // Parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
@@ -17,10 +16,6 @@ app.use('/posts', require('./routes/posts'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Hello World' });
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
 });
 
 module.exports = app;

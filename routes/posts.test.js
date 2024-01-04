@@ -4,9 +4,14 @@ const {
   expect,
 } = require('@jest/globals');
 const request = require('supertest');
-const app = require('../app');
-const jwt = require('jsonwebtoken');
+
 require('dotenv').config();
+const port = process.env.EXPRESS_PORT || 3000;
+
+const app = require('../app');
+let server = null;
+
+const jwt = require('jsonwebtoken');
 const { AUTH_SECRET } = process.env;
 
 const mockToken = jwt.sign(
@@ -19,10 +24,25 @@ const mockToken = jwt.sign(
 
 /*
   TODO: Fix this issue (usually encountered after doing `npm run test` where the Jest script doesn't exit after all tests have been executed):
+
   Jest did not exit one second after the test run has completed.
 
   'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
+
+  NOTE: Tried adding beforeAll and afterAll but still did not seem to resolve the "open handles" issue
 */
+
+beforeAll(() => {
+  server = app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+});
+
+afterAll(() => {
+  console.log('closing...');
+  server.close();
+  server = null;
+});
 
 describe('GET /posts/all', () => {
   test('given a valid token', async () => {
