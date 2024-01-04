@@ -81,6 +81,19 @@ Endpoints
 ```
 
 
+* logout user
+    * pass token as header
+    * validations 
+        * if token is invalid, return an unauthorized error
+    * update user_logins.token to null
+    * return success
+```
+{
+    "success": <boolean>
+}
+```
+
+
 
 * list down all posts 
     * pass token as header
