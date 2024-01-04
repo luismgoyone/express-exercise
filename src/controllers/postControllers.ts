@@ -66,6 +66,28 @@ const getUserPost = async  (req:Request, res:Response) => {
         return res.status(500).json({ error: 'Error getting user posts' });
     }
 }
+const updatePost = async (req:Request, res:Response) => {
+    try {
+        const {post_id} = req.params
+        const {content}= req.body
 
+        console.log(content,post_id)
 
-export {getAllPosts, createPost, getUserPost}
+        const findPost = await pool.query("SELECT content from posts where id=$1",[post_id])
+
+        if(findPost.rows.length === 0){
+            return res.status(200).json({ message: 'No User Post, Please check inputed id' });
+        }
+
+        const updatePostQuery = await pool.query("UPDATE posts SET content = $1 WHERE id = $2 RETURNING id, content",[content, post_id])
+
+        const updatedPost = updatePostQuery.rows[0];
+
+        return res.status(200).json({ message: 'Post Updated successfully', post: updatedPost });
+    } catch (error) {
+        return res.status(500).json({ error: 'Error Updating post' });
+    }
+    
+}
+
+export {getAllPosts, createPost, getUserPost,updatePost}

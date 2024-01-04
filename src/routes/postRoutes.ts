@@ -1,7 +1,7 @@
 import { Router } from "express";
 const router = Router()
 import {verify} from "../auth";
-import { getAllPosts, createPost, getUserPost } from "../controllers/postControllers";
+import { getAllPosts, createPost, getUserPost, updatePost } from "../controllers/postControllers";
 
 
     // view all
@@ -13,8 +13,8 @@ import { getAllPosts, createPost, getUserPost } from "../controllers/postControl
     //get user posts
     router.get('/user-post/:user_id',verify,getUserPost)
 
-	// //Update post
-	// router.post("/update-post/",verify, loginUser)
+	//Update post
+	router.put("/update-post/:post_id",verify, updatePost)
 
 	// //delete post
 	// router.post("/logout",verify, logoutUser)
