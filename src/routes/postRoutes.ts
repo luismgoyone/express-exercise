@@ -1,7 +1,7 @@
 import { Router } from "express";
 const router = Router()
 import {verify} from "../auth";
-import { getAllPosts, createPost } from "../controllers/postControllers";
+import { getAllPosts, createPost, getUserPost } from "../controllers/postControllers";
 
 
     // view all
@@ -9,6 +9,9 @@ import { getAllPosts, createPost } from "../controllers/postControllers";
 
 	// create post
 	router.post('/create-post',verify, createPost)
+
+    //get user posts
+    router.get('/user-post/:user_id',verify,getUserPost)
 
 	// //Update post
 	// router.post("/update-post/",verify, loginUser)

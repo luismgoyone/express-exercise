@@ -26,7 +26,7 @@ const getAllPosts = async (req:Request, res:Response) => {
         return res.status(500).json({ error: 'Error getting All Post' });
     }
 }
-const createPost =async (req:Request, res:Response) => {
+const createPost = async (req:Request, res:Response) => {
 
     try {
    
@@ -41,11 +41,31 @@ const createPost =async (req:Request, res:Response) => {
     } catch (error) {
         return res.status(500).json({ error: 'Error creating post' });
     }
-   
-
-    
-
 
 }
 
-export {getAllPosts, createPost}
+const getUserPost = async  (req:Request, res:Response) => {
+    try {
+
+    const {user_id} = req.params
+
+    const getUserPostResult = await pool.query("SELECT id,content from posts where user_id = $1",[user_id])
+
+    if(getUserPostResult.rows.length === 0){
+        return res.status(200).json({ message: 'No User Post' });
+    }
+
+    const userPosts = getUserPostResult.rows.map((post) => ({ 
+        id: post.id,
+        content: post.content
+    }));
+
+    return res.status(200).json({ data: userPosts });
+
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting user posts' });
+    }
+}
+
+
+export {getAllPosts, createPost, getUserPost}
