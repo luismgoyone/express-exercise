@@ -4,7 +4,7 @@ import pool from "../database";
 
 const getAllPosts = async (req:Request, res:Response) => {
     try {
-        const allPostQuery = await pool.query("SELECT posts.id, content, first_name,last_name from posts INNER JOIN users ON posts.user_id = users.id INNER JOIN user_logins ON users.id = user_logins.user_id ORDER BY created_at DESC")
+        const allPostQuery = await pool.query("SELECT posts.id, content, first_name,last_name, user_logins.username from posts INNER JOIN users ON posts.user_id = users.id INNER JOIN user_logins ON users.id = user_logins.user_id ORDER BY created_at DESC")
         
         if(allPostQuery.rows.length === 0)
         {
