@@ -68,10 +68,8 @@ const getUserPost = async  (req:Request, res:Response) => {
 }
 const updatePost = async (req:Request, res:Response) => {
     try {
-        const {post_id} = req.params
+        const { post_id } = req.params
         const {content}= req.body
-
-        console.log(content,post_id)
 
         const findPost = await pool.query("SELECT content from posts where id=$1",[post_id])
 
@@ -87,7 +85,31 @@ const updatePost = async (req:Request, res:Response) => {
     } catch (error) {
         return res.status(500).json({ error: 'Error Updating post' });
     }
-    
+
 }
 
-export {getAllPosts, createPost, getUserPost,updatePost}
+const deletePost = async (req: Request, res:Response) =>{
+    try {
+        const { post_id } = req.params
+        console.log(post_id)
+        const findPost = await pool.query("SELECT id from posts where id=$1",[post_id])
+
+        if(findPost.rows.length === 0){
+            return res.status(200).json({ message: 'No User Post' });
+        }
+        
+        const deletePostQuery = await pool.query(
+            "DELETE FROM posts WHERE id = $1 RETURNING id, content",
+            [post_id]
+          );
+
+          const deletedPost = deletePostQuery.rows[0];
+
+          return res.status(200).json({ message: 'Post Deleted', post: deletedPost });
+
+    } catch (error) {
+        return res.status(500).json({ error: 'Error Deleting Post' });
+    }
+}
+
+export {getAllPosts, createPost, getUserPost,updatePost, deletePost}

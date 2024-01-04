@@ -1,7 +1,7 @@
 import { Router } from "express";
 const router = Router()
 import {verify} from "../auth";
-import { getAllPosts, createPost, getUserPost, updatePost } from "../controllers/postControllers";
+import { getAllPosts, createPost, getUserPost, updatePost, deletePost, } from "../controllers/postControllers";
 
 
     // view all
@@ -16,7 +16,7 @@ import { getAllPosts, createPost, getUserPost, updatePost } from "../controllers
 	//Update post
 	router.put("/update-post/:post_id",verify, updatePost)
 
-	// //delete post
-	// router.post("/logout",verify, logoutUser)
+	//delete post
+	router.delete("/delete-post/:post_id",verify, deletePost)
 
 module.exports = router;
