@@ -2,11 +2,11 @@ import { Request, Response } from "express";
 import pool from "../database";
 
 
-const getAllPosts =async (res:Response) => {
+const getAllPosts = async (req:Request, res:Response) => {
     try {
-        const allPostQuery = await pool.query("SELECT posts.id, content,first_name,last_name from posts INNER JOIN users ON posts.user_id = users.id INNER JOIN user_logins ON users.id = user_logins.user_id ORDER BY created_at DESC")
+        const allPostQuery = await pool.query("SELECT posts.id, content, first_name,last_name from posts INNER JOIN users ON posts.user_id = users.id INNER JOIN user_logins ON users.id = user_logins.user_id ORDER BY created_at DESC")
         
-        if(!allPostQuery.rows.length)
+        if(allPostQuery.rows.length === 0)
         {
             return res.status(200).json({ message: 'No Post' });
         }
@@ -39,7 +39,6 @@ const createPost =async (req:Request, res:Response) => {
     return res.status(201).json({ message: 'Post created successfully', post: postResponse });
 
     } catch (error) {
-        console.error(error)
         return res.status(500).json({ error: 'Error creating post' });
     }
    
