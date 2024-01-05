@@ -43,6 +43,7 @@ func main() {
 
 	router.POST("/register", createUserAccount)
 	router.PUT("/login", loginUserAccount)
+	router.PUT("/logout", logoutUserAccount)
 	router.Run("localhost:8080")
 }
 
@@ -186,4 +187,33 @@ func loginUserAccount(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, loginUserAccountReturn)
+}
+
+func logoutUserAccount(c *gin.Context) {
+	type LogoutUserAccountReturn struct {
+		Success bool     `json:"success"`
+		Errors  []string `json:"errors"`
+	}
+	var errs []error
+
+	token := c.GetHeader("Token")
+	err := removeToken(token)
+
+	var logoutUserAccountReturn LogoutUserAccountReturn
+
+	if err != nil {
+		errs = append(errs, err)
+
+		logoutUserAccountReturn = LogoutUserAccountReturn{
+			Success: false,
+			Errors:  jsonifyErrors(errs).Errors,
+		}
+		c.IndentedJSON(http.StatusInternalServerError, logoutUserAccountReturn)
+	}
+
+	logoutUserAccountReturn = LogoutUserAccountReturn{
+		Success: true,
+		Errors:  jsonifyErrors(errs).Errors,
+	}
+	c.IndentedJSON(http.StatusInternalServerError, logoutUserAccountReturn)
 }
