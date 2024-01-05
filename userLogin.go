@@ -68,6 +68,30 @@ func verifyUserLogin(username string, password string) error {
 	return nil
 }
 
+func findToken(token string) error {
+	var matchingToken string
+	sqlStatement := `
+		SELECT token
+		FROM user_logins
+		WHERE token=$1
+	`
+	row := db.QueryRow(sqlStatement, token)
+	err := row.Scan(&matchingToken)
+	noResultsError := "sql: no rows in result set"
+
+	if err != nil && err.Error() == noResultsError {
+		return fmt.Errorf("Unauthorized user! This machine will self destruct in 3... 2... 1... *BOOM*")
+	}
+	if err != nil {
+		return fmt.Errorf("findToken: %v", err)
+	}
+	if token != matchingToken {
+		return fmt.Errorf("Wait, what? You got past the error checkers with non-matching tokens?!")
+	}
+
+	return nil
+}
+
 // UPDATE
 
 func addToken(username string) error {
@@ -85,6 +109,26 @@ func addToken(username string) error {
 		return fmt.Errorf("addToken: %v", err)
 	}
 	return err
+}
+
+func removeToken(token string) error {
+	err := findToken(token)
+	if err != nil {
+		return err
+	}
+
+	sqlStatement := `
+		UPDATE user_logins
+		SET token=null
+		WHERE token=$1
+	`
+	row := db.QueryRow(sqlStatement, token)
+	err = row.Err()
+	if err != nil {
+		return fmt.Errorf("removeToken: %v", err)
+	}
+
+	return nil
 }
 
 // DELETE
