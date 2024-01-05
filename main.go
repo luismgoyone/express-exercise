@@ -215,5 +215,5 @@ func logoutUserAccount(c *gin.Context) {
 		Success: true,
 		Errors:  jsonifyErrors(errs).Errors,
 	}
-	c.IndentedJSON(http.StatusInternalServerError, logoutUserAccountReturn)
+	c.IndentedJSON(http.StatusOK, logoutUserAccountReturn)
 }
