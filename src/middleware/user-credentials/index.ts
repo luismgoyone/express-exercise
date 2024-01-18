@@ -13,11 +13,10 @@ const userCrendentialValidator = async (request: ExpressCustomRequest<UserRegist
     return response.status(409).send({ "error": "username is does not exist!" })
   }
 
-  // check if username and password match
-  const validation = await UserLogin.validate({ username, password })
+  const result = await UserLogin.validate({ username, password })
 
-  if(!validation) {
-    return response.status(409).send({ "error": "username is does not match" })
+  if(!result) {
+    return response.status(409).send({ "error": "username is does not match with password!" })
   }
 
   next()

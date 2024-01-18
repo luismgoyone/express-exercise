@@ -10,5 +10,13 @@ type UserLoginType = {
   password: string
 }
 
-export type { UserLoginType, UserRegisterType }
+type UserCredentials = {
+  id: number
+  first_name: string
+  last_name: string
+  username: string
+  token: string
+}
+
+export type { UserCredentials, UserLoginType, UserRegisterType }
 

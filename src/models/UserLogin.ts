@@ -1,4 +1,5 @@
 import Db from "@connectors/Db"
+import { UserCredentials } from "@utils/types/request"
 
 
 export type UserLoginsFields = {
@@ -10,13 +11,11 @@ export type UserLoginsFields = {
 }
 
 class UserLogin {
-  static async checkUsernameExist(fields: Partial<UserLoginsFields>): Promise<boolean> {
+  static async checkUsernameExist(fields: Partial<UserLoginsFields>): Promise<UserLoginsFields[]> {
     const connector = Db.getInstance()
 
       // returns if there is a match for the username
-      const rows = await connector('user_logins').select('username').where(fields)
-
-      const result =!!rows
+      const result = await connector('user_logins').select('username').where(fields)
 
       connector.destroy()
 
@@ -33,12 +32,10 @@ class UserLogin {
     return result
   }
 
-  static async validate(fields: Partial<UserLoginsFields>): Promise<boolean> {
+  static async validate(fields: Partial<UserLoginsFields>): Promise<UserLoginsFields> {
     const connector = Db.getInstance()
 
-    const rows = await connector('user_logins').select('username', 'password').where(fields).first()
-
-    const result = !!rows
+    const result = await connector('user_logins').select('username', 'password').where(fields).first()
 
     connector.destroy()
 
@@ -48,13 +45,32 @@ class UserLogin {
   static async update(fields: Partial<UserLoginsFields>, conditions: Partial<UserLoginsFields>) {
     const connector = Db.getInstance()
 
-    const result = await connector('user_logins').update(fields).where(conditions)
-    
+    const [result] = await connector('user_logins').update(fields).where(conditions).returning<UserLoginsFields[]>(['*'])
+ 
     connector.destroy()
 
     return result
   }
 
+  static async getById(id: number): Promise<UserCredentials> {
+    const connector = Db.getInstance()
+
+    const result = await connector('user_logins')
+    .select(
+      'users.id as id',
+      'users.first_name as first_name',
+      'users.last_name as last_name',
+      'user_logins.username',
+      'user_logins.token',
+    )
+    .innerJoin('users', 'user_logins.user_id', 'users.id')
+    .where('users.id', id)
+    .first()
+
+    connector.destroy()
+
+    return result
+  }
 }
 
 export default UserLogin

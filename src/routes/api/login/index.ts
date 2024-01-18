@@ -7,25 +7,20 @@ import jwt from 'jsonwebtoken';
 
 const routes = Router()
 
-// checks db if username and password match with the incoming userlogin creds
-
 const privateKey = process.env.SECRET_KEY || 'random'
 
 routes.post('/login', validator, async (request: ExpressCustomRequest<UserLoginType>, response: Response) => {
   const { username } = request.body
 
-  // const token = jwt.sign({ id: res.locals.userId })
   const timestamp = new Date().toLocaleTimeString('en-US', { timeZone: 'UTC' });
 
   const token = jwt.sign({ id: response.locals.userId }, privateKey!)
 
-  console.log('Updating the data')
-  console.log(token, 'this is a token')
-  await UserLogin.update({token, last_login_at: timestamp}, { username })
-
-
-
-  return response.status(200).send({"result": "test"})
+  const { user_id: id } = await UserLogin.update({token, last_login_at: timestamp}, { username })
+  
+  const result = await UserLogin.getById(id)
+  
+  return response.status(200).send(result)
 })
 
 export default routes

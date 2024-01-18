@@ -20,15 +20,15 @@ class User {
     return result
   }
 
-  static async getById(data: Partial<UserFields>): Promise<UserCredentials> {
+  static async getById(id: number): Promise<UserCredentials> {
     const connector = Db.getInstance()
 
-    const result = await connector('users').select('users.id', 'users.first_name', 'users.last_name', 'user_logins.username')
-    .from('users')
+    const result = await connector('users')
+    .select('users.id', 'users.first_name', 'users.last_name', 'user_logins.username')
     .join('user_logins', 'users.id', 'user_logins.user_id')
-    .where('users.id', data.id)
+    .where('users.id', id)
     .first()
-    
+
     connector.destroy()
 
     return result

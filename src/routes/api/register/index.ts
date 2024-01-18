@@ -12,13 +12,13 @@ routes.post('/register', validator, async (request: ExpressCustomRequest<UserReg
 
 
   // create user 
-  const { id } = await User.create({first_name, last_name})  
+  const { id } = await User.create({ first_name, last_name })  
 
   // create user login
-  await UserLogin.register({user_id: id, username, password })
+  await UserLogin.register({ user_id: id, username, password })
   
   // return user
-  const result = await User.getById({ id, first_name, last_name })
+  const result = await User.getById(id)
 
 
   return response.status(200).send(result)
