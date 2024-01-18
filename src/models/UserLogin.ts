@@ -10,25 +10,17 @@ export type UserLoginsFields = {
 }
 
 class UserLogin {
-  static async getVerified(fields: Partial<UserLoginsFields>) {
+  static async checkUsernameExist(fields: Partial<UserLoginsFields>): Promise<boolean> {
     const connector = Db.getInstance()
-    try {
+
       // returns if there is a match for the username
-      const result = await connector('user_logins').select('username').where(fields)
-    
-      if (result.length > 0) {
-        console.log(`${fields.username} already exists in the database`)
-        // You may want to throw an error, return a specific value, or handle this case accordingly
-        // For example, you could throw an error: throw new Error('Username already exists');
-      } else {
-        console.log(`${fields.username} is available`)
-      }
-    
+      const rows = await connector('user_logins').select('username').where(fields)
+
+      const result =!!rows
+
+      connector.destroy()
+
       return result
-    } catch (error) {
-      console.error('Error checking username:', error);
-      throw error; // Propagate the error to the caller
-    }
   }
 
   static async register(data: Partial<UserLoginsFields>): Promise<UserLoginsFields> {
@@ -40,6 +32,29 @@ class UserLogin {
 
     return result
   }
+
+  static async validate(fields: Partial<UserLoginsFields>): Promise<boolean> {
+    const connector = Db.getInstance()
+
+    const rows = await connector('user_logins').select('username', 'password').where(fields).first()
+
+    const result = !!rows
+
+    connector.destroy()
+
+    return result
+  }
+
+  static async update(fields: Partial<UserLoginsFields>, conditions: Partial<UserLoginsFields>) {
+    const connector = Db.getInstance()
+
+    const result = await connector('user_logins').update(fields).where(conditions)
+    
+    connector.destroy()
+
+    return result
+  }
+
 }
 
 export default UserLogin

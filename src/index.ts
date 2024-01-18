@@ -1,4 +1,4 @@
-// import login from '@routes/api/login'
+import login from '@routes/api/login'
 import registerUser from '@routes/api/register'
 import health from '@routes/health'
 import { config } from 'dotenv'
@@ -20,7 +20,7 @@ const prefix = '/exercise'
 // register routes
 app.use(prefix, health)
 app.use(prefix, registerUser)
-// app.use(prefix, login)
+app.use(prefix, login)
 
 
 app.listen(port, () => {

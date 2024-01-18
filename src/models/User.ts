@@ -15,7 +15,6 @@ class User {
 
     const [result] = await connector('users').insert(data).returning<UserFields[]>(['*'])
 
-
     connector.destroy()
 
     return result
@@ -29,6 +28,8 @@ class User {
     .join('user_logins', 'users.id', 'user_logins.user_id')
     .where('users.id', data.id)
     .first()
+    
+    connector.destroy()
 
     return result
   }
