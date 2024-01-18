@@ -1,7 +1,8 @@
-import express, { Express, } from 'express'
+// import login from '@routes/api/login'
+import registerUser from '@routes/api/register'
+import health from '@routes/health'
 import { config } from 'dotenv'
-import health from './routes/health'
-import registerUser from './routes/api/register'
+import express, { Express, } from 'express'
 
 config()
 
@@ -12,12 +13,15 @@ const port = process.env.PORT || 8000
 // parse data sent in http
 app.use(express.json())
 
-const prefix = '/exercise-express-pg'
+const prefix = '/exercise'
 
 
+// acts as controller
 // register routes
 app.use(prefix, health)
 app.use(prefix, registerUser)
+// app.use(prefix, login)
+
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)

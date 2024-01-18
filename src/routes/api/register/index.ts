@@ -1,30 +1,27 @@
-import express, { Router, Request, Response } from 'express'
-import usernameValidator from '@middleware/username'
-import passwordValidator from '@middleware/password'
-import { UserRegister } from '@utils/types/register'
-import ExpressCustomRequest from '@utils/types/express-request'
-import UserLogin from '@models/UserLogin'
+import validator from '@middleware/validator'
 import User from '@models/User'
-
+import UserLogin from '@models/UserLogin'
+import ExpressCustomRequest from '@utils/types/express-request'
+import { UserRegister } from '@utils/types/register'
+import { Response, Router } from 'express'
 const routes = Router()
 
-// note to self: same with fastify, (url, prehandler*middlware*, handler)
-const requestsValidator = [usernameValidator, passwordValidator]
-
-routes.post('/register', requestsValidator, async (request: ExpressCustomRequest<UserRegister>, response: Response) => {
+routes.post('/register', validator, async (request: ExpressCustomRequest<UserRegister>, response: Response) => {
   const { username, first_name, last_name, password } = request.body
 
-  const { id: user_id, first_name: firstName, last_name: lastName } = await User.register({ first_name, last_name })
 
-  const { username: userName} = await UserLogin.register({ user_id, username, password })
+  // create user 
+  const { id } = await User.create({first_name, last_name})  
+
+  // create user login
+  const user = await UserLogin.register({user_id: id, username, password })
+  
+  // return user
+  const result = 'test'
+  // const result = await User.getById({ id, first_name, last_name })
 
 
-  return response.status(200).send({
-    id: user_id,
-    first_name: firstName,
-    last_name: lastName,
-    username: userName
-  })
+  return response.status(200).send(result)
 }) 
 
 export default routes
