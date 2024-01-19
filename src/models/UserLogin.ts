@@ -11,13 +11,13 @@ export type UserLoginsFields = {
 }
 
 class UserLogin {
-  static async checkUsernameExist(fields: Partial<UserLoginsFields>): Promise<UserLoginsFields[]> {
+  static async getBy(fields: Partial<UserLoginsFields>): Promise<UserLoginsFields> {
     const connector = Db.getInstance()
 
-    const result = await connector('user_logins').select('username').where(fields)
+    const result = await connector('user_logins').where(fields).first()
 
     connector.destroy()
-
+    console.log(result, 'whats happening heer: ')
     return result
   }
 
@@ -51,7 +51,7 @@ class UserLogin {
     return result
   }
 
-  static async getById(id: number): Promise<UserCredentials> {
+  static async getUserInformation(id: number): Promise<UserCredentials> {
     const connector = Db.getInstance()
 
     const result = await connector('user_logins')

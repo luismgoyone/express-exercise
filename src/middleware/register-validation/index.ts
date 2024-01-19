@@ -7,13 +7,16 @@ const registerValidator = async (request: ExpressCustomRequest<UserRegisterType>
 
   const { username, password } = request.body
 
+  if(!username || username.length > 20) {
+    return response.status(400).send({ "error": "username is to long for 20 characters!" })
+  }
   if(!password || password.length < 8) {
     return response.status(400).send({ "error": "password is less than 8 characters!" })
   }
 
-  const result = await UserLogin.checkUsernameExist({ username })
+  const UsernameAlreadyExist = await UserLogin.getBy({ username })
 
-  if(result.length > 0) {
+  if(UsernameAlreadyExist) {
     return response.status(409).send({ "error": "username is already exist!" })
   }
 

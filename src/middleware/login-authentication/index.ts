@@ -4,17 +4,24 @@ import { UserRegisterType } from '@utils/types/request'
 import { NextFunction, Response } from 'express'
 
 const usernameAuthentication = async (request: ExpressCustomRequest<UserRegisterType> , response: Response, next: NextFunction) => {
-
   const { username, password } = request.body
 
-  const doesUsernameExist = await UserLogin.checkUsernameExist({ username })
+  if(!username) {
+    return response.status(409).send({ "error": "invalid username!" })
+  }
 
-  if(!doesUsernameExist) {
+  const usernameExist = await UserLogin.getBy({ username })
+
+  if(!usernameExist) {
     return response.status(409).send({ "error": "username is does not exist!" })
   }
 
-  const result = await UserLogin.validateUser({ username, password })
+  const { user_id } = usernameExist
 
+  const result = await UserLogin.validateUser({ username, password })
+  
+  response.locals.id = user_id
+  // if undefined
   if(!result) {
     return response.status(409).send({ "error": "username is does not match with password!" })
   }
