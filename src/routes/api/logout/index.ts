@@ -10,6 +10,7 @@ const privateKey = process.env.SECRET_KEY || 'random'
 
 routes.post('/logout', tokenAuthentication, async (request: ExpressCustomRequest<UserLoginType>, response: Response) => {
   const user_id = response.locals.tokenId
+  
   console.log('user id : ', response.locals.tokenId)
 
   await UserLogin.update({ token: null },{ user_id })

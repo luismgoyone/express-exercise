@@ -10,16 +10,11 @@ const routes = Router()
 routes.post('/register', registerValidation, async (request: ExpressCustomRequest<UserRegisterType>, response: Response) => {
   const { username, first_name, last_name, password } = request.body
 
-
-  // create user 
   const { id } = await User.create({ first_name, last_name })  
 
-  // create user login
   await UserLogin.register({ user_id: id, username, password })
   
-  // return user
   const result = await User.getById(id)
-
 
   return response.status(200).send(result)
 }) 

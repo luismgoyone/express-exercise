@@ -12,8 +12,7 @@ const privateKey = process.env.SECRET_KEY || 'random'
 routes.post('/login', loginAuthentication, async (request: ExpressCustomRequest<UserLoginType>, response: Response) => {
   const { username } = request.body
 
-  // create timestamp
-  const timestamp = new Date().toLocaleTimeString('en-US', { timeZone: 'UTC' });
+  const timestamp = new Date().toLocaleTimeString('en-US', { timeZone: 'UTC' })
   
   console.log('user id : ', response.locals.id)
 

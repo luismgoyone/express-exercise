@@ -17,8 +17,6 @@ app.use(express.json())
 
 const prefix = '/exercise'
 
-
-// acts as controller
 // register routes
 app.use(prefix, health)
 app.use(prefix, registerUser)
@@ -29,5 +27,4 @@ app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
 })
 
-// note to self: entire project is working under one instance of express
 export default app
