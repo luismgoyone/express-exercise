@@ -14,12 +14,11 @@ class UserLogin {
   static async checkUsernameExist(fields: Partial<UserLoginsFields>): Promise<UserLoginsFields[]> {
     const connector = Db.getInstance()
 
-      // returns if there is a match for the username
-      const result = await connector('user_logins').select('username').where(fields)
+    const result = await connector('user_logins').select('username').where(fields)
 
-      connector.destroy()
+    connector.destroy()
 
-      return result
+    return result
   }
 
   static async register(data: Partial<UserLoginsFields>): Promise<UserLoginsFields> {
@@ -32,7 +31,7 @@ class UserLogin {
     return result
   }
 
-  static async validate(fields: Partial<UserLoginsFields>): Promise<UserLoginsFields> {
+  static async validateUser(fields: Partial<UserLoginsFields>): Promise<UserLoginsFields> {
     const connector = Db.getInstance()
 
     const result = await connector('user_logins').select('username', 'password').where(fields).first()

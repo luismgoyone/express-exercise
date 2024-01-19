@@ -3,7 +3,7 @@ import ExpressCustomRequest from '@utils/types/express-request'
 import { UserRegisterType } from '@utils/types/request'
 import { NextFunction, Response } from 'express'
 
-const userCrendentialValidator = async (request: ExpressCustomRequest<UserRegisterType> , response: Response, next: NextFunction) => {
+const usernameAuthentication = async (request: ExpressCustomRequest<UserRegisterType> , response: Response, next: NextFunction) => {
 
   const { username, password } = request.body
 
@@ -13,7 +13,7 @@ const userCrendentialValidator = async (request: ExpressCustomRequest<UserRegist
     return response.status(409).send({ "error": "username is does not exist!" })
   }
 
-  const result = await UserLogin.validate({ username, password })
+  const result = await UserLogin.validateUser({ username, password })
 
   if(!result) {
     return response.status(409).send({ "error": "username is does not match with password!" })
@@ -22,4 +22,4 @@ const userCrendentialValidator = async (request: ExpressCustomRequest<UserRegist
   next()
 }
 
-export default userCrendentialValidator
+export default usernameAuthentication

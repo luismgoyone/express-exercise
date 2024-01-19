@@ -1,4 +1,4 @@
-import validator from '@middleware/validator'
+import registerValidation from '@middleware/register-validation'
 import User from '@models/User'
 import UserLogin from '@models/UserLogin'
 import ExpressCustomRequest from '@utils/types/express-request'
@@ -7,7 +7,7 @@ import { Response, Router } from 'express'
 
 const routes = Router()
 
-routes.post('/register', validator, async (request: ExpressCustomRequest<UserRegisterType>, response: Response) => {
+routes.post('/register', registerValidation, async (request: ExpressCustomRequest<UserRegisterType>, response: Response) => {
   const { username, first_name, last_name, password } = request.body
 
 
