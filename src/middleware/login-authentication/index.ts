@@ -21,7 +21,7 @@ const usernameAuthentication = async (request: ExpressCustomRequest<UserRegister
   const result = await UserLogin.validateUser({ username, password })
   
   response.locals.id = user_id
-  // if undefined
+
   if(!result) {
     return response.status(409).send({ "error": "username is does not match with password!" })
   }

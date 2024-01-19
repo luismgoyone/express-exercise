@@ -4,7 +4,7 @@ import { UserCredentials } from "@utils/types/request"
 
 export type UserLoginsFields = {
   user_id: number
-  token: string
+  token: string | null
   last_login_at: string
   username: string
   password: string

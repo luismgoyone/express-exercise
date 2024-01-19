@@ -1,8 +1,10 @@
 import login from '@routes/api/login'
+import logout from '@routes/api/logout'
 import registerUser from '@routes/api/register'
 import health from '@routes/health'
 import { config } from 'dotenv'
 import express, { Express, } from 'express'
+
 
 config()
 
@@ -21,7 +23,7 @@ const prefix = '/exercise'
 app.use(prefix, health)
 app.use(prefix, registerUser)
 app.use(prefix, login)
-
+app.use(prefix, logout)
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
