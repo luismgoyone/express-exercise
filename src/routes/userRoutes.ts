@@ -8,7 +8,7 @@ import {verify} from "../auth";
 	router.post('/register',bodyParser, registerUser)
 
 	//login
-	router.post("/login",bodyParser,verify, loginUser)
+	router.post("/login",bodyParser, loginUser)
 
 	//logout
 	router.post("/logout",verify, logoutUser)
