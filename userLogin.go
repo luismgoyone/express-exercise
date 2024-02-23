@@ -10,7 +10,8 @@ func insertUserLogin(userLogin UserLogin) (int, error) {
 	VALUES ($1, $2, $3)
 	RETURNING user_id`
 	var user_id int
-	row := db.QueryRow(sqlStatement, userLogin.user_id, userLogin.username, userLogin.password)
+	hashedPassword, _ := hashPassword(userLogin.password)
+	row := db.QueryRow(sqlStatement, userLogin.user_id, userLogin.username, hashedPassword)
 	err := row.Scan(&user_id)
 	if err != nil {
 		return 0, fmt.Errorf("insertUserLogin: %v", err)
@@ -61,7 +62,8 @@ func verifyUserLogin(username string, password string) error {
 	if err != nil {
 		return fmt.Errorf("userLogin: %v", err)
 	}
-	if password != userLogin.password {
+	isPasswordCorrect := checkPasswordHash(password, userLogin.password)
+	if !isPasswordCorrect {
 		return fmt.Errorf("Username or password is incorrect")
 	}
 
