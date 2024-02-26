@@ -42,8 +42,8 @@ func main() {
 	router := gin.Default()
 
 	router.POST("/register", createUserAccount)
-	router.PUT("/login", loginUserAccount)
-	router.PUT("/logout", logoutUserAccount)
+	router.PATCH("/login", loginUserAccount)
+	router.DELETE("/logout", logoutUserAccount)
 	router.Run("localhost:8080")
 }
 
@@ -131,7 +131,7 @@ func createUserAccount(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, createdUser)
 }
 
-// PUT
+// PATCH
 
 func loginUserAccount(c *gin.Context) {
 	type LoginUserAccountBody struct {
@@ -188,6 +188,8 @@ func loginUserAccount(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, loginUserAccountReturn)
 }
+
+// DELETE
 
 func logoutUserAccount(c *gin.Context) {
 	type LogoutUserAccountReturn struct {
