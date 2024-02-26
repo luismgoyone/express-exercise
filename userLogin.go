@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // CREATE
 
@@ -99,13 +102,16 @@ func findToken(token string) error {
 func addToken(username string) error {
 	var userId int
 	newToken := generateSecureToken(64)
+	tz, _ := time.LoadLocation("Asia/Manila")
+	now := time.Now().In(tz).Format("2006-01-02T15:04:05 -07:00:00")
 	sqlStatement := `
 		UPDATE user_logins
-		SET token=$1
-		WHERE username=$2
+		SET token=$1,
+				last_login_at=$2
+		WHERE username=$3
 		RETURNING user_id
 	`
-	row := db.QueryRow(sqlStatement, newToken, username)
+	row := db.QueryRow(sqlStatement, newToken, now, username)
 	err := row.Scan(&userId)
 	if err != nil {
 		return fmt.Errorf("addToken: %v", err)
