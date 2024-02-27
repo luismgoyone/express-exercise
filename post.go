@@ -3,6 +3,26 @@ package main
 // CREATE
 
 // READ
+func getAllUserPostsById(user_id int) ([]Posts, error) {
+	var posts []Posts
+
+	sqlStatement := `
+		SELECT
+			id,
+			content
+		FROM posts
+		WHERE user_id=$1
+	`
+	rows, err := db.Query(sqlStatement, user_id)
+	if err != nil {
+		return posts, err
+	}
+
+	rows.Scan(&posts)
+
+	return posts, err
+
+}
 
 // UPDATE
 

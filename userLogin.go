@@ -97,6 +97,28 @@ func findToken(token string) error {
 	return nil
 }
 
+func getUserIdByToken(token string) (int, error) {
+	var user_id int
+	sqlStatement := `
+		SELECT 
+			user_id
+		FROM user_logins
+		WHERE token=$1
+	`
+	row := db.QueryRow(sqlStatement, token)
+	err := row.Scan(&user_id)
+	noResultsError := "sql: no rows in result set"
+
+	if err != nil && err.Error() == noResultsError {
+		return 0, fmt.Errorf("no user id with token found")
+	}
+	if err != nil {
+		return 0, fmt.Errorf("getUserIdByToken: %v", err)
+	}
+
+	return user_id, nil
+}
+
 // UPDATE
 
 func addToken(username string) error {

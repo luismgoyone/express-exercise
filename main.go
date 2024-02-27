@@ -44,6 +44,7 @@ func main() {
 	router.POST("/register", createUserAccount)
 	router.PATCH("/login", loginUserAccount)
 	router.DELETE("/logout", logoutUserAccount)
+	router.GET("/posts", getAllUserPosts)
 	router.Run("localhost:8080")
 }
 
@@ -61,6 +62,56 @@ func jsonifyErrors(errors []error) ErrorJson {
 	}
 
 	return jsonErrors
+}
+
+// GET
+
+func getAllUserPosts(c *gin.Context) {
+	type UserPost struct {
+		ID        int    `json:"id"`
+		Content   string `json:"content"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Username  string `json:"username"`
+	}
+	var errs []error
+	var getAllUserPostsReturn []UserPost
+
+	token := c.GetHeader("Token")
+
+	userId, err := getUserIdByToken(token)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusUnauthorized, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	userAccount, err := getUserAccountByUserId(userId)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusNotFound, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	posts, err := getAllUserPostsById(userId)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusNoContent, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	for _, post := range posts {
+		userPost := UserPost{
+			ID:        post.id,
+			Content:   post.content,
+			FirstName: userAccount.first_name,
+			LastName:  userAccount.last_name,
+			Username:  userAccount.username,
+		}
+		getAllUserPostsReturn = append(getAllUserPostsReturn, userPost)
+	}
+
+	c.IndentedJSON(http.StatusOK, getAllUserPostsReturn)
 }
 
 // POST
