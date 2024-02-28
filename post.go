@@ -11,20 +11,20 @@ func getAllPostsWithUserAccount() ([]PostWithUserAccount, error) {
 			posts.id,
 			posts.content,
 			posts.created_at,
-			posts.user_id
+			posts.user_id,
 			users.first_name,
 			users.last_name,
-			user_logins.username,
+			user_logins.username
 		FROM posts
 		JOIN
 			user_logins
 		ON
-			user_id = user_id
+			posts.user_id = user_logins.user_id
 		JOIN
 			users
 		ON
-			user_id = id
-		ORDER_BY
+			posts.user_id = users.id
+		ORDER BY
 			created_at
 	`
 	rows, err := db.Query(sqlStatement)
