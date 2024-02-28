@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -45,6 +46,7 @@ func main() {
 	router.PATCH("/login", loginUserAccount)
 	router.DELETE("/logout", logoutUserAccount)
 	router.GET("/posts", getAllPosts)
+	router.GET("/posts/:user_id", getAllUserPosts)
 	router.Run("localhost:8080")
 }
 
@@ -116,8 +118,9 @@ func getAllUserPosts(c *gin.Context) {
 	var getAllUserPostsReturn []UserPost
 
 	token := c.GetHeader("Token")
+	userId, _ := strconv.Atoi(c.Param("user_id"))
 
-	userId, err := getUserIdByToken(token)
+	err := findToken(token)
 	if err != nil {
 		errs = append(errs, err)
 		c.IndentedJSON(http.StatusUnauthorized, jsonifyErrors(errs))
