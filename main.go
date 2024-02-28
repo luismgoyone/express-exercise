@@ -44,7 +44,7 @@ func main() {
 	router.POST("/register", createUserAccount)
 	router.PATCH("/login", loginUserAccount)
 	router.DELETE("/logout", logoutUserAccount)
-	router.GET("/posts", getAllUserPosts)
+	router.GET("/posts", getAllPosts)
 	router.Run("localhost:8080")
 }
 
@@ -66,13 +66,51 @@ func jsonifyErrors(errors []error) ErrorJson {
 
 // GET
 
-func getAllUserPosts(c *gin.Context) {
-	type UserPost struct {
+func getAllPosts(c *gin.Context) {
+	type PostWithUserInfo struct {
 		ID        int    `json:"id"`
 		Content   string `json:"content"`
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
 		Username  string `json:"username"`
+	}
+	var errs []error
+	var getAllUserPostsReturn []PostWithUserInfo
+
+	token := c.GetHeader("Token")
+
+	err := findToken(token)
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusForbidden, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	posts, err := getAllPostsWithUserAccount()
+	if err != nil {
+		errs = append(errs, err)
+		c.IndentedJSON(http.StatusNoContent, jsonifyErrors(errs))
+		panic(err)
+	}
+
+	for _, post := range posts {
+		userPost := PostWithUserInfo{
+			ID:        post.id,
+			Content:   post.content,
+			FirstName: post.first_name,
+			LastName:  post.last_name,
+			Username:  post.username,
+		}
+		getAllUserPostsReturn = append(getAllUserPostsReturn, userPost)
+	}
+
+	c.IndentedJSON(http.StatusOK, getAllUserPostsReturn)
+}
+
+func getAllUserPosts(c *gin.Context) {
+	type UserPost struct {
+		ID      int    `json:"id"`
+		Content string `json:"content"`
 	}
 	var errs []error
 	var getAllUserPostsReturn []UserPost
@@ -86,13 +124,6 @@ func getAllUserPosts(c *gin.Context) {
 		panic(err)
 	}
 
-	userAccount, err := getUserAccountByUserId(userId)
-	if err != nil {
-		errs = append(errs, err)
-		c.IndentedJSON(http.StatusNotFound, jsonifyErrors(errs))
-		panic(err)
-	}
-
 	posts, err := getAllUserPostsById(userId)
 	if err != nil {
 		errs = append(errs, err)
@@ -102,11 +133,8 @@ func getAllUserPosts(c *gin.Context) {
 
 	for _, post := range posts {
 		userPost := UserPost{
-			ID:        post.id,
-			Content:   post.content,
-			FirstName: userAccount.first_name,
-			LastName:  userAccount.last_name,
-			Username:  userAccount.username,
+			ID:      post.id,
+			Content: post.content,
 		}
 		getAllUserPostsReturn = append(getAllUserPostsReturn, userPost)
 	}

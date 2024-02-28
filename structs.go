@@ -14,6 +14,11 @@ type Posts struct {
 	created_at string
 }
 
+type PostWithUserAccount struct {
+	Posts
+	UserAccount
+}
+
 //USER
 
 type User struct {
