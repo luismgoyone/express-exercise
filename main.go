@@ -75,7 +75,7 @@ func getAllPosts(c *gin.Context) {
 		Username  string `json:"username"`
 	}
 	var errs []error
-	var getAllUserPostsReturn []PostWithUserInfo
+	var getAllPostsReturn []PostWithUserInfo
 
 	token := c.GetHeader("Token")
 
@@ -101,10 +101,10 @@ func getAllPosts(c *gin.Context) {
 			LastName:  post.last_name,
 			Username:  post.username,
 		}
-		getAllUserPostsReturn = append(getAllUserPostsReturn, userPost)
+		getAllPostsReturn = append(getAllPostsReturn, userPost)
 	}
 
-	c.IndentedJSON(http.StatusOK, getAllUserPostsReturn)
+	c.IndentedJSON(http.StatusOK, getAllPostsReturn)
 }
 
 func getAllUserPosts(c *gin.Context) {

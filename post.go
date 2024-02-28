@@ -10,6 +10,7 @@ func getAllPostsWithUserAccount() ([]PostWithUserAccount, error) {
 		SELECT
 			posts.id,
 			posts.content,
+			posts.created_at,
 			posts.user_id
 			users.first_name,
 			users.last_name,
@@ -23,6 +24,8 @@ func getAllPostsWithUserAccount() ([]PostWithUserAccount, error) {
 			users
 		ON
 			user_id = id
+		ORDER_BY
+			created_at
 	`
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
