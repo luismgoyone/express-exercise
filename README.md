@@ -1,4 +1,4 @@
-### BE Exercise (Node.js & PostgreSQL)
+### BE Exercise from Booky (Node.js & PostgreSQL)
 
 # Overview
 create a backend application that allows user registration/login as well as create posts for each user
